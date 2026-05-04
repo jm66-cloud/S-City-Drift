@@ -1,1 +1,155 @@
-<h1>你好，世界</h1>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S市漂模拟 v1.0</title>
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/desktop.css">
+  <link rel="stylesheet" href="assets/css/window.css">
+  <link rel="stylesheet" href="assets/css/crt.css">
+  <link rel="stylesheet" href="assets/css/stock.css">
+  <link rel="stylesheet" href="assets/css/chat.css">
+  <link rel="stylesheet" href="assets/css/company.css">
+  <link rel="stylesheet" href="assets/css/settings.css">
+  <link rel="stylesheet" href="assets/css/modal.css">
+  <link href="https://cdn.jsdelivr.net/npm/zpix@3.1.0/dist/Zpix.woff2" rel="stylesheet" as="font" crossorigin>
+</head>
+<body>
+  <div id="crt-monitor">
+    <div class="crt-screen">
+      <div id="top-bar" class="top-bar"></div>
+      <div id="desktop" class="desktop">
+        <div id="icon-grid" class="icon-grid"></div>
+        <div id="window-container" class="window-container"></div>
+        <div id="new-game-overlay" class="new-game-overlay">
+          <div class="new-game-box">
+            <h1>S市漂模拟 v1.0</h1>
+            <div class="story-text" id="story-text">
+              2000年，你大学刚毕业，<br>
+              揣着打工攒下的10万块钱，<br>
+              坐上了开往这座城的绿皮火车...<br>
+              在这座城市里，你要面对<br>
+              人情世故、商场暗战、甚至法律的边界<br>
+              你的选择，将决定你的未来。
+            </div>
+            <div class="difficulty-select">
+              <label>难度选择：</label>
+              <button class="diff-btn active" data-diff="1" onclick="Game.setDifficulty(1)">普通</button>
+              <button class="diff-btn" data-diff="0" onclick="Game.setDifficulty(0)">简单</button>
+              <button class="diff-btn" data-diff="2" onclick="Game.setDifficulty(2)">困难</button>
+            </div>
+            <div class="name-input-row">
+              <label>姓名：</label>
+              <input type="text" id="player-name" placeholder="输入你的名字" maxlength="8">
+            </div>
+            <button class="start-btn" onclick="Game.startNew()">开始新生活</button>
+          </div>
+        </div>
+        <div id="modal-overlay" class="modal-overlay hidden"></div>
+      </div>
+      <div id="status-bar" class="status-bar"></div>
+    </div>
+    <div class="crt-brand">S市漂模拟</div>
+    <div class="crt-led"></div>
+  </div>
+  <div id="toast-container" class="toast-container"></div>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/utils/random.js"></script>
+  <script src="assets/js/utils/format.js"></script>
+  <script src="assets/js/utils/storage.js"></script>
+  <script src="assets/js/utils/pixel.js"></script>
+  <script src="assets/js/utils/MobileDetect.js"></script>
+  <script src="assets/js/engine/SceneSystem.js"></script>
+  <script src="assets/js/engine/DevConsole.js"></script>
+  <script src="assets/js/engine/SoundEngine.js"></script>
+  <script src="assets/js/models/Stock.js"></script>
+  <script src="assets/js/models/Company.js"></script>
+  <script src="assets/js/models/Character.js"></script>
+  <script src="assets/js/models/BotTrader.js"></script>
+  <script src="assets/js/models/Order.js"></script>
+  <script src="assets/js/models/Message.js"></script>
+  <script src="assets/js/models/Romance.js"></script>
+  <script src="assets/js/models/Property.js"></script>
+  <script src="assets/js/models/Vehicle.js"></script>
+  <script src="assets/js/models/Crime.js"></script>
+  <script src="assets/js/models/NewsArticle.js"></script>
+  <script src="assets/js/engine/GameLoop.js"></script>
+  <script src="assets/js/engine/TimeEngine.js"></script>
+  <script src="assets/js/engine/CharacterEngine.js"></script>
+  <script src="assets/js/engine/StockEngine.js"></script>
+  <script src="assets/js/engine/CompanyEngine.js"></script>
+  <script src="assets/js/engine/BotEngine.js"></script>
+  <script src="assets/js/engine/IPOEngine.js"></script>
+  <script src="assets/js/engine/NewsEngine.js"></script>
+  <script src="assets/js/engine/CriminalEngine.js"></script>
+  <script src="assets/js/engine/RomanceEngine.js"></script>
+  <script src="assets/js/engine/AssetEngine.js"></script>
+  <script src="assets/js/engine/EventEngine.js"></script>
+  <script src="assets/js/engine/TutorialEngine.js"></script>
+  <script src="assets/js/engine/AIEngine.js"></script>
+  <script src="assets/js/engine/SaveEngine.js"></script>
+  <script src="assets/js/data/stocks.js"></script>
+  <script src="assets/js/data/companies.js"></script>
+  <script src="assets/js/data/contacts.js"></script>
+  <script src="assets/js/data/industry.js"></script>
+  <script src="assets/js/data/news_templates.js"></script>
+  <script src="assets/js/data/romance_chars.js"></script>
+  <script src="assets/js/data/housing.js"></script>
+  <script src="assets/js/data/vehicles.js"></script>
+  <script src="assets/js/ui/CRT.js"></script>
+  <script src="assets/js/ui/Desktop.js"></script>
+  <script src="assets/js/ui/WindowManager.js"></script>
+  <script src="assets/js/ui/TitleBar.js"></script>
+  <script src="assets/js/ui/StatusBar.js"></script>
+  <script src="assets/js/ui/Modal.js"></script>
+  <script src="assets/js/ui/NewGame.js"></script>
+  <script src="assets/js/ui/stock/StockApp.js"></script>
+  <script src="assets/js/ui/stock/StockListPanel.js"></script>
+  <script src="assets/js/ui/stock/KLineChart.js"></script>
+  <script src="assets/js/ui/stock/OrderBook.js"></script>
+  <script src="assets/js/ui/stock/TradeForm.js"></script>
+  <script src="assets/js/ui/stock/PortfolioPanel.js"></script>
+  <script src="assets/js/ui/stock/AccountPanel.js"></script>
+  <script src="assets/js/ui/stock/OrderHistory.js"></script>
+  <script src="assets/js/ui/life/LifeApp.js"></script>
+  <script src="assets/js/ui/life/StatusDisplay.js"></script>
+  <script src="assets/js/ui/life/EatPanel.js"></script>
+  <script src="assets/js/ui/life/SleepPanel.js"></script>
+  <script src="assets/js/ui/life/ShopPanel.js"></script>
+  <script src="assets/js/ui/life/DailyLog.js"></script>
+  <script src="assets/js/ui/chat/ChatApp.js"></script>
+  <script src="assets/js/ui/chat/ContactList.js"></script>
+  <script src="assets/js/ui/chat/ChatView.js"></script>
+  <script src="assets/js/ui/chat/ContactInfo.js"></script>
+  <script src="assets/js/ui/company/CompanyApp.js"></script>
+  <script src="assets/js/ui/company/CompanyDash.js"></script>
+  <script src="assets/js/ui/company/HRPanel.js"></script>
+  <script src="assets/js/ui/company/RDPanel.js"></script>
+  <script src="assets/js/ui/company/MarketingPanel.js"></script>
+  <script src="assets/js/ui/company/ProductionPanel.js"></script>
+  <script src="assets/js/ui/company/FinancePanel.js"></script>
+  <script src="assets/js/ui/company/CrimePanel.js"></script>
+  <script src="assets/js/ui/company/AuditWarn.js"></script>
+  <script src="assets/js/ui/company/IPOApplyPanel.js"></script>
+  <script src="assets/js/ui/news/NewsApp.js"></script>
+  <script src="assets/js/ui/news/NewsList.js"></script>
+  <script src="assets/js/ui/news/NewsDetail.js"></script>
+  <script src="assets/js/ui/news/NewsNotification.js"></script>
+  <script src="assets/js/ui/romance/RomanceApp.js"></script>
+  <script src="assets/js/ui/romance/ProfileList.js"></script>
+  <script src="assets/js/ui/romance/DatePanel.js"></script>
+  <script src="assets/js/ui/romance/RelationshipStatus.js"></script>
+  <script src="assets/js/ui/romance/WeddingPanel.js"></script>
+  <script src="assets/js/ui/assets/AssetsApp.js"></script>
+  <script src="assets/js/ui/assets/HousingPanel.js"></script>
+  <script src="assets/js/ui/assets/VehiclePanel.js"></script>
+  <script src="assets/js/ui/assets/MortgagePanel.js"></script>
+  <script src="assets/js/ui/donors/DonorApp.js"></script>
+  <script src="assets/js/ui/donors/DonorList.js"></script>
+  <script src="assets/js/ui/settings/SettingsApp.js"></script>
+  <script src="assets/js/ui/settings/AISettings.js"></script>
+  <script src="assets/js/ui/settings/GameSettings.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

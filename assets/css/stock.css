@@ -1,0 +1,39 @@
+.stock-app { display: flex; flex-direction: column; height: 100%; }
+.stock-layout { display: flex; flex: 1; gap: 8px; overflow: hidden; }
+.stock-sidebar { width: 140px; flex-shrink: 0; border-right: 1px solid #000; padding-right: 8px; }
+.stock-sidebar .nav-item {
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 14px;
+  border: 1px solid transparent;
+}
+.stock-sidebar .nav-item:hover { background: rgba(255,255,255,0.1); }
+.stock-sidebar .nav-item.active { background: var(--highlight); color: var(--text-bright); }
+.stock-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.stock-chart-area { flex: 1; min-height: 200px; position: relative; }
+.stock-chart-area canvas { width: 100%; height: 100%; image-rendering: pixelated; }
+.stock-right { width: 200px; flex-shrink: 0; border-left: 1px solid #000; padding-left: 8px; overflow-y: auto; }
+.stock-orderbook { font-size: 12px; }
+.stock-orderbook .ob-row { display: flex; justify-content: space-between; padding: 1px 0; }
+.stock-orderbook .ob-row.ask { color: var(--color-down); }
+.stock-orderbook .ob-row.bid { color: var(--color-up); }
+.stock-orderbook .ob-mid { border-top: 1px solid var(--text-dim); border-bottom: 1px solid var(--text-dim); margin: 2px 0; padding: 2px 0; text-align: center; color: var(--text-bright); }
+.trade-form { margin-top: 8px; font-size: 13px; }
+.trade-form .tf-row { display: flex; align-items: center; gap: 4px; margin-bottom: 4px; }
+.trade-form .tf-row input { width: 80px; font-size: 13px; }
+.trade-form .tf-btns { display: flex; gap: 4px; margin-top: 6px; }
+.trade-form .tf-btns button { flex: 1; padding: 4px; }
+.stock-list-panel { font-size: 13px; }
+.stock-list-panel .sl-header { display: flex; gap: 4px; padding: 4px 0; border-bottom: 1px solid #000; font-weight: bold; }
+.stock-list-panel .sl-row { display: flex; gap: 4px; padding: 3px 0; cursor: pointer; border-bottom: 1px solid rgba(0,0,0,0.3); }
+.stock-list-panel .sl-row:hover { background: rgba(255,255,255,0.08); }
+.stock-list-panel .sl-code { width: 70px; }
+.stock-list-panel .sl-name { width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stock-list-panel .sl-price { width: 70px; text-align: right; }
+.stock-list-panel .sl-change { width: 60px; text-align: right; }
+.stock-list-panel .sl-search { width: 100%; margin-bottom: 4px; font-size: 13px; }
+.portfolio-panel { font-size: 13px; }
+.portfolio-panel .pf-row { display: flex; gap: 4px; padding: 3px 0; border-bottom: 1px solid rgba(0,0,0,0.3); }
+.portfolio-panel .pf-header { display: flex; gap: 4px; padding: 4px 0; border-bottom: 1px solid #000; font-weight: bold; }
+.account-panel { font-size: 13px; }
+.account-panel .ap-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(0,0,0,0.3); }

@@ -1,0 +1,8 @@
+.modal-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 8000; display: flex; align-items: center; justify-content: center; }
+.modal-overlay.hidden { display: none; }
+.modal-box { background: var(--bg-panel); border: 2px solid var(--border); min-width: 280px; max-width: 500px; padding: 16px; box-shadow: 8px 8px 0 rgba(0,0,0,0.5); }
+.modal-box h3 { color: var(--text-bright); margin-bottom: 12px; font-size: 16px; }
+.modal-box p { margin-bottom: 12px; line-height: 1.6; }
+.modal-box .modal-input { width: 100%; margin-bottom: 8px; }
+.modal-box .modal-buttons { display: flex; gap: 8px; justify-content: center; margin-top: 12px; }
+.modal-box .modal-buttons button { min-width: 60px; }

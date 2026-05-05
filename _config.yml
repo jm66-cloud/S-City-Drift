@@ -1,7 +1,0 @@
-title: S市漂模拟
-description: 像素风电脑桌面模拟经营游戏
-baseurl: ""
-url: ""
-markdown: kramdown
-theme: jekyll-theme-cayman
-exclude: [".kilo", "node_modules"]

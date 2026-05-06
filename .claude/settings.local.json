@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(xxd)",
-      "Bash(xxd \"d:/github/game/docs/itch-io策划案.md\")",
-      "Bash(ghead -n -0 \"d:/github/game/docs/itch-io策划案.md\")"
-    ]
-  }
-}

@@ -1,4 +1,5 @@
 import * as Phaser from 'phaser';
+import { DialogManager } from '../core/DialogManager';
 
 export interface ZoneExit {
   targetScene: string;
@@ -20,6 +21,7 @@ export interface BuildingData {
 }
 
 export interface NPCLocalData {
+  id: string;
   x: number;
   y: number;
   color: number;
@@ -46,10 +48,12 @@ export class ZoneScene extends Phaser.Scene {
   protected roadColor = 0x5a5a6e;
   protected sidewalkColor = 0x9a9a8e;
   protected bgmKey = 'bgm-daily1';
+  protected dayNight = 12; // 0-24, 默认白天
   private inTransition = false;
   private currentBGM: Phaser.Sound.BaseSound | null = null;
   private walkers: Phaser.GameObjects.Graphics[] = [];
   private walkerTargets: Array<{ x: number; y: number }> = [];
+  private dialogMgr!: DialogManager;
 
   init(): void {
     this.inTransition = false;
@@ -58,6 +62,7 @@ export class ZoneScene extends Phaser.Scene {
   create(): void {
     this.exits = [];
     this.buildings = [];
+    this.dialogMgr = new DialogManager(this);
     this.physics.world.setBounds(0, 0, this.worldWidth, this.worldHeight);
     this.cameras.main.setBounds(0, 0, this.worldWidth, this.worldHeight);
 
@@ -71,6 +76,7 @@ export class ZoneScene extends Phaser.Scene {
     this.createInput();
     this.createHUD();
     this.createWalkers();
+    this.createDayNight();
     this.playBGM();
 
     console.log(`[${this.constructor.name}] ${this.zoneName} 已加载`);
@@ -80,6 +86,7 @@ export class ZoneScene extends Phaser.Scene {
     if (this.inTransition) return;
     this.handleMovement();
     this.updateWalkers();
+    this.updateDayNight();
   }
 
   // ============ 地面 ============
@@ -292,12 +299,7 @@ export class ZoneScene extends Phaser.Scene {
     for (const npc of this.npcData) {
       if (Math.abs(px - npc.x) < 50 && Math.abs(py - npc.y) < 40) {
         const greeting = npc.greetings[Math.floor(Math.random() * npc.greetings.length)];
-        const dlg = this.add.text(640, 660, `[${npc.name}] ${npc.role}\n"${greeting}"`, {
-          fontFamily: 'sans-serif', fontSize: '14px', color: '#ffffff',
-          backgroundColor: '#000000ee', padding: { x: 16, y: 10 },
-          align: 'center', wordWrap: { width: 600 },
-        }).setOrigin(0.5, 0.5).setDepth(50).setScrollFactor(0);
-        this.time.delayedCall(3000, () => dlg.destroy());
+        this.dialogMgr.showDialog(npc.name, npc.role, npc.id, greeting);
         return;
       }
     }
@@ -422,6 +424,25 @@ export class ZoneScene extends Phaser.Scene {
       const dy = wt.y - wy;
       const dist = Math.sqrt(dx * dx + dy * dy) || 1;
       this.walkers[i].setPosition(wx + (dx / dist) * speed, wy + (dy / dist) * speed);
+    }
+  }
+
+  // ============ 昼夜 ============
+  private createDayNight(): void {
+    const overlay = this.add.rectangle(this.worldWidth / 2, this.worldHeight / 2,
+      this.worldWidth * 3, this.worldHeight * 3, 0x000022).setDepth(99).setAlpha(0);
+    overlay.setName('daynight');
+  }
+
+  private updateDayNight(): void {
+    const overlay = this.children.getByName('daynight') as Phaser.GameObjects.Rectangle;
+    if (!overlay) return;
+    if (this.dayNight >= 20 || this.dayNight < 6) {
+      overlay.setAlpha(0.25);
+    } else if (this.dayNight >= 18) {
+      overlay.setAlpha(0.1);
+    } else {
+      overlay.setAlpha(0);
     }
   }
 }

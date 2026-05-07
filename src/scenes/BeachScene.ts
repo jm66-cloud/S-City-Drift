@@ -26,9 +26,9 @@ class BeachScene extends ZoneScene {
     ];
 
     this.npcData = [
-      { x: 1850, y: 600, color: 0x88aacc, name: '老渔夫', role: '渔民', greetings: ['今天浪不小啊。', '这片海域的鱼可肥了。', '想学钓鱼？我教你。'] },
-      { x: 750, y: 750, color: 0xffcc88, name: '游客', role: '游客', greetings: ['这沙滩真漂亮！', '帮我拍张照吧？', '你也是来度假的吗？'] },
-      { x: 1350, y: 650, color: 0xccffaa, name: '小美', role: '摊贩', greetings: ['新鲜椰汁！一份¥30！', '贝壳手链要看看吗？', '今天生意不错哈！'] },
+      { id: 'lao_yufu', x: 1850, y: 600, color: 0x88aacc, name: '老渔夫', role: '渔民', greetings: ['今天浪不小啊。', '这片海域的鱼可肥了。', '想学钓鱼？我教你。'] },
+      { id: 'you_ke', x: 750, y: 750, color: 0xffcc88, name: '游客', role: '游客', greetings: ['这沙滩真漂亮！', '帮我拍张照吧？', '你也是来度假的吗？'] },
+      { id: 'xiao_mei', x: 1350, y: 650, color: 0xccffaa, name: '小美', role: '摊贩', greetings: ['新鲜椰汁！一份¥30！', '贝壳手链要看看吗？', '今天生意不错哈！'] },
     ];
 
     super.create();

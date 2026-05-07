@@ -32,9 +32,9 @@ class DowntownScene extends ZoneScene {
     ];
 
     this.npcData = [
-      { x: 400, y: 380, color: 0xddaaaa, name: '陈雅', role: '分析师', greetings: ['基本面分析显示这个板块有机会。', '季报马上要出了，建议观望。', '今天大盘情绪不错。'] },
-      { x: 860, y: 380, color: 0xaaaacc, name: '赵警官', role: '民警', greetings: ['最近治安不错。', '注意防范电信诈骗。', '有可疑情况随时来报案。'] },
-      { x: 680, y: 350, color: 0xaaaaff, name: '阿强', role: '炒股伙伴', greetings: ['嘿兄弟！我刚看到一条内幕消息...', '今天这行情，得小心。', '那个600009有动静。'] },
+      { id: 'chen_ya', x: 400, y: 380, color: 0xddaaaa, name: '陈雅', role: '分析师', greetings: ['基本面分析显示这个板块有机会。', '季报马上要出了，建议观望。', '今天大盘情绪不错。'] },
+      { id: 'zhao_jingguan', x: 860, y: 380, color: 0xaaaacc, name: '赵警官', role: '民警', greetings: ['最近治安不错。', '注意防范电信诈骗。', '有可疑情况随时来报案。'] },
+      { id: 'a_qiang', x: 680, y: 350, color: 0xaaaaff, name: '阿强', role: '炒股伙伴', greetings: ['嘿兄弟！我刚看到一条内幕消息...', '今天这行情，得小心。', '那个600009有动静。'] },
     ];
 
     super.create();

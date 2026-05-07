@@ -30,9 +30,9 @@ class SuburbScene extends ZoneScene {
     ];
 
     this.npcData = [
-      { x: 700, y: 400, color: 0xffaaaa, name: '王阿姨', role: '房东', greetings: ['小王，房租该交了啊！', '来来来，阿姨做了红烧肉！', '今天菜市场鸡蛋便宜。'] },
-      { x: 1000, y: 980, color: 0xccccaa, name: '老张', role: '退休工人', greetings: ['今天手气不错！赢了王阿姨三把。', '年轻人要多锻炼啊。', '东沙滩那边有大鱼！'] },
-      { x: 1400, y: 520, color: 0x88ccff, name: '小李', role: '程序员', greetings: ['996真的好累...', '要不要一起创业？', '我写了个人工智能炒股模型。'] },
+      { id: 'wang_ayi', x: 700, y: 400, color: 0xffaaaa, name: '王阿姨', role: '房东', greetings: ['小王，房租该交了啊！', '来来来，阿姨做了红烧肉！', '今天菜市场鸡蛋便宜。'] },
+      { id: 'lao_zhang', x: 1000, y: 980, color: 0xccccaa, name: '老张', role: '退休工人', greetings: ['今天手气不错！赢了王阿姨三把。', '年轻人要多锻炼啊。', '东沙滩那边有大鱼！'] },
+      { id: 'xiao_li', x: 1400, y: 520, color: 0x88ccff, name: '小李', role: '程序员', greetings: ['996真的好累...', '要不要一起创业？', '我写了个人工智能炒股模型。'] },
     ];
 
     super.create();

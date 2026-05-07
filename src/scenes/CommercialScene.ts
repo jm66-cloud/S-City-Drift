@@ -35,9 +35,9 @@ class CommercialScene extends ZoneScene {
     ];
 
     this.npcData = [
-      { x: 650, y: 320, color: 0xffccaa, name: '小琳', role: '咖啡师', greetings: ['欢迎光临～新豆子刚到。', '最近研究了新拉花！', '你的品味一直很好呢...'] },
-      { x: 320, y: 320, color: 0x88cc88, name: '周老板', role: '店主', greetings: ['欢迎光临～', '今天的特价商品看了吗？', '需要帮忙找什么吗？'] },
-      { x: 850, y: 770, color: 0xcc88ff, name: '美玲', role: '护士', greetings: ['工作太累了，来放松一下。', '健康很重要哦。', '你看起来气色不错！'] },
+      { id: 'xiao_lin', x: 650, y: 320, color: 0xffccaa, name: '小琳', role: '咖啡师', greetings: ['欢迎光临～新豆子刚到。', '最近研究了新拉花！', '你的品味一直很好呢...'] },
+      { id: 'zhou_laoban', x: 320, y: 320, color: 0x88cc88, name: '周老板', role: '店主', greetings: ['欢迎光临～', '今天的特价商品看了吗？', '需要帮忙找什么吗？'] },
+      { id: 'mei_ling', x: 850, y: 770, color: 0xcc88ff, name: '美玲', role: '护士', greetings: ['工作太累了，来放松一下。', '健康很重要哦。', '你看起来气色不错！'] },
     ];
 
     super.create();

@@ -74,6 +74,7 @@ export class ZoneScene extends Phaser.Scene {
     this.placeBuildings();
     this.placeExits();
     this.placeNPCs();
+    this.placeVehicles();
     this.createPlayer();
     this.createInput();
     this.createHUD();
@@ -94,35 +95,28 @@ export class ZoneScene extends Phaser.Scene {
 
   // ============ 地面 ============
   protected drawGround(): void {
-    const gfx = this.add.graphics().setDepth(0);
-    // 渐变色块 — 用多个不同明暗的矩形模拟自然地表
-    const rows = 8;
-    const cols = 8;
-    const cw = this.worldWidth / cols;
-    const ch = this.worldHeight / rows;
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const shade = 10 + Math.floor(Math.random() * 15);
-        const rgb = this.shadeColor(this.zoneColor, shade);
-        gfx.fillStyle(rgb, 1);
-        gfx.fillRect(c * cw, r * ch, cw + 1, ch + 1);
-      }
-    }
+    // 用真实 tileset tile 平铺地面
+    const tileKey = this.textures.exists('tile-ground-city') ? 'tile-ground-city'
+      : this.textures.exists('tile-ground-sub') ? 'tile-ground-sub' : null;
 
-    // tileset 平铺
-    const tileKey = this.textures.exists('ground-tile-clean')
-      ? 'ground-tile-clean' : this.textures.exists('ground-tile-roam')
-      ? 'ground-tile-roam' : null;
     if (tileKey) {
+      // tileset 平铺作为地面主要纹理
       const ts = this.add.tileSprite(this.worldWidth / 2, this.worldHeight / 2,
-        this.worldWidth, this.worldHeight, tileKey).setDepth(0).setAlpha(0.18);
-      ts.setScale(4);
+        this.worldWidth, this.worldHeight, tileKey).setDepth(0).setScale(6);
+      // 颜色叠加柔和
+      const colorOverlay = this.add.rectangle(this.worldWidth / 2, this.worldHeight / 2,
+        this.worldWidth, this.worldHeight, this.zoneColor, 0.5).setDepth(0);
+    } else {
+      // 回退：纯色背景
+      this.add.rectangle(this.worldWidth / 2, this.worldHeight / 2,
+        this.worldWidth, this.worldHeight, this.zoneColor).setDepth(0);
     }
 
-    // 随机斑点
-    for (let i = 0; i < this.worldWidth / 8; i++) {
-      gfx.fillStyle(this.shadeColor(this.zoneColor, -3 + Math.floor(Math.random() * 6)), 0.5);
-      gfx.fillCircle(Math.random() * this.worldWidth, Math.random() * this.worldHeight, 2 + Math.random() * 4);
+    // 地面斑点(减少数量，更多依赖 tileset)
+    const gfx = this.add.graphics().setDepth(0);
+    for (let i = 0; i < this.worldWidth / 15; i++) {
+      gfx.fillStyle(this.shadeColor(this.zoneColor, -2 + Math.floor(Math.random() * 4)), 0.3);
+      gfx.fillCircle(Math.random() * this.worldWidth, Math.random() * this.worldHeight, 1 + Math.random() * 2);
     }
   }
 
@@ -132,28 +126,25 @@ export class ZoneScene extends Phaser.Scene {
 
   // ============ 建筑 ============
   protected placeBuildings(): void {
-    this.buildings.forEach(b => {
-      const gfx = this.add.graphics().setDepth(3);
-      // 建筑主体
-      gfx.fillStyle(b.color, 1);
-      gfx.fillRoundedRect(b.x - 45, b.y - 35, 90, 70, 5);
-      // 边框
-      gfx.lineStyle(2, this.shadeColor(b.color, 30));
-      gfx.strokeRoundedRect(b.x - 45, b.y - 35, 90, 70, 5);
-      // 窗户
-      gfx.fillStyle(0x334466, 0.8);
-      gfx.fillRect(b.x - 20, b.y - 15, 12, 16);
-      gfx.fillRect(b.x + 8, b.y - 15, 12, 16);
-      // 门
-      gfx.fillStyle(0x332211, 1);
-      gfx.fillRect(b.x - 6, b.y + 5, 12, 24);
-      // 屋顶
-      gfx.fillStyle(this.shadeColor(b.color, -15), 1);
-      gfx.fillTriangle(
-        b.x - 50, b.y - 35,
-        b.x + 50, b.y - 35,
-        b.x, b.y - 55,
-      );
+    const bldKeys = ['tile-building1', 'tile-building2', 'tile-building3'];
+    this.buildings.forEach((b, i) => {
+      const texKey = this.textures.exists(bldKeys[i % 3]) ? bldKeys[i % 3] : null;
+      if (texKey) {
+        this.add.image(b.x, b.y, texKey).setDepth(3).setScale(1.5);
+      } else {
+        const gfx = this.add.graphics().setDepth(3);
+        gfx.fillStyle(b.color, 1);
+        gfx.fillRoundedRect(b.x - 45, b.y - 35, 90, 70, 5);
+        gfx.lineStyle(2, this.shadeColor(b.color, 30));
+        gfx.strokeRoundedRect(b.x - 45, b.y - 35, 90, 70, 5);
+        gfx.fillStyle(0x334466, 0.8);
+        gfx.fillRect(b.x - 20, b.y - 15, 12, 16);
+        gfx.fillRect(b.x + 8, b.y - 15, 12, 16);
+        gfx.fillStyle(0x332211, 1);
+        gfx.fillRect(b.x - 6, b.y + 5, 12, 24);
+        gfx.fillStyle(this.shadeColor(b.color, -15), 1);
+        gfx.fillTriangle(b.x - 50, b.y - 35, b.x + 50, b.y - 35, b.x, b.y - 55);
+      }
 
       this.add.text(b.x, b.y + 42, b.label, {
         fontFamily: 'sans-serif', fontSize: '11px', color: '#ffffff',
@@ -180,40 +171,52 @@ export class ZoneScene extends Phaser.Scene {
 
   // ============ NPC ============
   protected placeNPCs(): void {
-    this.npcData.forEach(npc => {
-      // NPC 人物
-      const gfx = this.add.graphics().setDepth(9);
-      gfx.fillStyle(npc.color, 1);
-      gfx.fillCircle(npc.x, npc.y - 10, 10);
-      gfx.fillStyle(this.shadeColor(npc.color, -20), 1);
-      gfx.fillRoundedRect(npc.x - 8, npc.y - 2, 16, 22, 4);
-      gfx.lineStyle(1, 0xffffff, 0.6);
-      gfx.strokeRoundedRect(npc.x - 8, npc.y - 2, 16, 22, 4);
-
-      this.add.text(npc.x, npc.y + 14, npc.name, {
-        fontFamily: 'sans-serif', fontSize: '9px', color: '#ffffff',
-        backgroundColor: '#000000aa', padding: { x: 2, y: 1 },
-      }).setOrigin(0.5, 0).setDepth(10);
+    const npcTexKeys = ['npc-amelia', 'npc-alex', 'npc-bob'];
+    this.npcData.forEach((npc, i) => {
+      const texKey = this.textures.exists(npcTexKeys[i % 3]) ? npcTexKeys[i % 3] : null;
+      if (texKey) {
+        const sprite = this.add.image(npc.x, npc.y, texKey).setDepth(9).setScale(1.5);
+        this.add.text(sprite.x, sprite.y + 20, npc.name, {
+          fontFamily: 'sans-serif', fontSize: '9px', color: '#ffffff',
+          backgroundColor: '#000000aa', padding: { x: 2, y: 1 },
+        }).setOrigin(0.5, 0).setDepth(10);
+      } else {
+        // 回退
+        const gfx = this.add.graphics().setDepth(9);
+        gfx.fillStyle(npc.color, 1);
+        gfx.fillCircle(npc.x, npc.y - 10, 10);
+        gfx.fillStyle(this.shadeColor(npc.color, -20), 1);
+        gfx.fillRoundedRect(npc.x - 8, npc.y - 2, 16, 22, 4);
+        gfx.lineStyle(1, 0xffffff, 0.6);
+        gfx.strokeRoundedRect(npc.x - 8, npc.y - 2, 16, 22, 4);
+        this.add.text(npc.x, npc.y + 14, npc.name, {
+          fontFamily: 'sans-serif', fontSize: '9px', color: '#ffffff',
+          backgroundColor: '#000000aa', padding: { x: 2, y: 1 },
+        }).setOrigin(0.5, 0).setDepth(10);
+      }
     });
   }
 
   // ============ 玩家 ============
   private createPlayer(): void {
-    const gfx = this.add.graphics();
-    gfx.fillStyle(0xffec27, 1);
-    gfx.fillCircle(12, 8, 8);
-    gfx.fillStyle(0xddcc00, 1);
-    gfx.fillRoundedRect(4, 14, 16, 20, 3);
-    gfx.lineStyle(1, 0x000000, 0.3);
-    gfx.strokeRoundedRect(4, 14, 16, 20, 3);
-    gfx.generateTexture('player-zone', 24, 34);
-    gfx.destroy();
-
-    this.player = this.physics.add.sprite(this.playerStartX, this.playerStartY, 'player-zone');
-    this.player.setDepth(10);
-    if (this.player.body) {
-      this.player.body.setCollideWorldBounds(true);
+    const texKey = this.textures.exists('player-tex') ? 'player-tex' : null;
+    if (texKey) {
+      this.player = this.physics.add.sprite(this.playerStartX, this.playerStartY, texKey);
+      this.player.setScale(1.5);
+    } else {
+      const gfx = this.add.graphics();
+      gfx.fillStyle(0xffec27, 1);
+      gfx.fillCircle(12, 8, 8);
+      gfx.fillStyle(0xddcc00, 1);
+      gfx.fillRoundedRect(4, 14, 16, 20, 3);
+      gfx.lineStyle(1, 0x000000, 0.3);
+      gfx.strokeRoundedRect(4, 14, 16, 20, 3);
+      gfx.generateTexture('player-zone', 24, 34);
+      gfx.destroy();
+      this.player = this.physics.add.sprite(this.playerStartX, this.playerStartY, 'player-zone');
     }
+    this.player.setDepth(10);
+    if (this.player.body) this.player.body.setCollideWorldBounds(true);
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
   }
 
@@ -339,6 +342,16 @@ export class ZoneScene extends Phaser.Scene {
 
   /** 绘制树丛 */
   protected drawTreeCluster(x: number, y: number, count = 4): void {
+    const texKey = this.textures.exists('tile-tree') ? 'tile-tree'
+      : this.textures.exists('tile-tree2') ? 'tile-tree2' : null;
+    if (texKey) {
+      for (let i = 0; i < count; i++) {
+        const tx = x + (Math.random() - 0.5) * 80;
+        const ty = y + (Math.random() - 0.5) * 60;
+        this.add.image(tx, ty, texKey).setDepth(2).setScale(1.8 + Math.random() * 0.4);
+      }
+      return;
+    }
     const gfx = this.add.graphics().setDepth(2);
     for (let i = 0; i < count; i++) {
       const tx = x + (Math.random() - 0.5) * 80;
@@ -347,8 +360,6 @@ export class ZoneScene extends Phaser.Scene {
       gfx.fillRect(tx - 2, ty + 8, 4, 16);
       gfx.fillStyle(this.shadeColor(0x3a7a3a, Math.floor(Math.random() * 20) - 10), 1);
       gfx.fillCircle(tx, ty, 14 + Math.random() * 6);
-      gfx.fillCircle(tx - 8, ty + 4, 10 + Math.random() * 4);
-      gfx.fillCircle(tx + 8, ty + 4, 10 + Math.random() * 4);
     }
   }
 
@@ -439,6 +450,29 @@ export class ZoneScene extends Phaser.Scene {
   }
 
   // ============ 公交 ============
+  private placeVehicles(): void {
+    const carKeys = ['car-blue', 'car-red', 'pickup-green'];
+    const roads = this.getRoadCenters();
+    roads.slice(0, 6).forEach((pos, i) => {
+      const texKey = this.textures.exists(carKeys[i % 3]) ? carKeys[i % 3] : null;
+      if (texKey) {
+        this.add.image(pos.x, pos.y, texKey).setDepth(5).setScale(1.2);
+      }
+    });
+  }
+
+  private getRoadCenters(): Array<{ x: number; y: number }> {
+    // 子类可覆盖，默认在道路区域随机位置
+    const spots: Array<{ x: number; y: number }> = [];
+    for (let i = 0; i < 8; i++) {
+      spots.push({
+        x: 100 + Math.random() * (this.worldWidth - 200),
+        y: 300 + Math.random() * (this.worldHeight - 600),
+      });
+    }
+    return spots;
+  }
+
   private placeBusStops(): void {
     this.busStops.forEach(stop => {
       const gfx = this.add.graphics().setDepth(3);

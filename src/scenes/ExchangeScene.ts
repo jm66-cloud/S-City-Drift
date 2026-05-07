@@ -195,31 +195,37 @@ class ExchangeScene extends Phaser.Scene {
     const history = this.engine.history.get(code);
     if (!history || history.length < 2) return;
 
-    const prices = history.map(p => p.price);
-    const minP = Math.min(...prices) * 0.99;
-    const maxP = Math.max(...prices) * 1.01;
+    const allPrices = history.flatMap(p => [p.high, p.low]);
+    const minP = Math.min(...allPrices) * 0.995;
+    const maxP = Math.max(...allPrices) * 1.005;
     const range = maxP - minP || 1;
+    const candleW = Math.max(4, w / history.length - 2);
 
-    // 背景
+    // 背景 + 网格
     this.chartGfx.fillStyle(0x111122, 1);
     this.chartGfx.fillRect(x, y, w, h);
-    this.chartGfx.lineStyle(1, 0x333344);
-    this.chartGfx.strokeRect(x, y, w, h);
+    this.chartGfx.lineStyle(1, 0x222244);
+    for (let i = 0; i < 5; i++) {
+      this.chartGfx.lineBetween(x, y + (h / 4) * i, x + w, y + (h / 4) * i);
+    }
 
-    // 价格线
-    this.chartGfx.lineStyle(2, 0x44cc44);
-    this.chartGfx.beginPath();
+    // 蜡烛
     history.forEach((pt, i) => {
-      const px = x + (i / (history.length - 1)) * w;
-      const py = y + h - ((pt.price - minP) / range) * h;
-      if (i === 0) this.chartGfx.moveTo(px, py);
-      else this.chartGfx.lineTo(px, py);
-    });
-    this.chartGfx.strokePath();
+      const cx = x + (i / (history.length - 1)) * (w - candleW);
+      const oy = y + h - ((pt.open - minP) / range) * h;
+      const cy = y + h - ((pt.close - minP) / range) * h;
+      const hy = y + h - ((pt.high - minP) / range) * h;
+      const ly = y + h - ((pt.low - minP) / range) * h;
+      const bodyTop = Math.min(oy, cy);
+      const bodyH = Math.max(Math.abs(oy - cy), 1);
 
-    // 当前价格标签
-    this.chartGfx.fillStyle(0x44cc44, 1);
-    this.chartGfx.fillCircle(x + w - 5, y + h - ((prices[prices.length - 1] - minP) / range) * h, 4);
+      const isGreen = pt.close >= pt.open;
+      this.chartGfx.fillStyle(isGreen ? 0x44cc44 : 0xcc4444, 1);
+      this.chartGfx.fillRect(cx, bodyTop, candleW, bodyH);
+      this.chartGfx.lineStyle(1, isGreen ? 0x44cc44 : 0xcc4444);
+      this.chartGfx.lineBetween(cx + candleW / 2, hy, cx + candleW / 2, bodyTop);
+      this.chartGfx.lineBetween(cx + candleW / 2, ly, cx + candleW / 2, bodyTop + bodyH);
+    });
   }
 
   private onTick(): void {

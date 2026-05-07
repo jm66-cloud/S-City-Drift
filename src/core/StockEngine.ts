@@ -11,7 +11,10 @@ export interface Stock {
 
 export interface PricePoint {
   time: number;
-  price: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
 }
 
 export interface Position {
@@ -28,13 +31,15 @@ export class StockEngine {
   constructor() {
     this.stocks = stockData.stocks.map(s => ({ ...s }));
     this.stocks.forEach(s => {
-      this.history.set(s.code, [{ time: 0, price: s.price }]);
+      const p = s.price;
+      this.history.set(s.code, [{ time: 0, open: p, high: p, low: p, close: p }]);
     });
   }
 
   tick(hour: number, minute: number): Map<string, number> {
     const changes = new Map<string, number>();
     this.stocks.forEach(stock => {
+      const prevClose = stock.price;
       const baseChange = (Math.random() - 0.5) * stock.volatility * 2;
       const trendEffect = stock.trend * 0.01;
       const totalChange = baseChange + trendEffect;
@@ -42,8 +47,18 @@ export class StockEngine {
       changes.set(stock.code, stock.price);
 
       const hist = this.history.get(stock.code)!;
-      if (hist.length > 60) hist.shift();
-      hist.push({ time: hour * 60 + minute, price: stock.price });
+      if (hist.length > 48) hist.shift();
+
+      const open = prevClose;
+      const close = stock.price;
+      const wick = Math.abs(open - close) * 0.3;
+      hist.push({
+        time: hour * 60 + minute,
+        open,
+        high: Math.max(open, close) + Math.random() * wick,
+        low: Math.min(open, close) - Math.random() * wick,
+        close,
+      });
     });
     return changes;
   }

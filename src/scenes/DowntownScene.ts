@@ -37,6 +37,12 @@ class DowntownScene extends ZoneScene {
       { id: 'a_qiang', x: 680, y: 350, color: 0xaaaaff, name: '阿强', role: '炒股伙伴', greetings: ['嘿兄弟！我刚看到一条内幕消息...', '今天这行情，得小心。', '那个600009有动静。'] },
     ];
 
+    this.busStops = [
+      { x: 1600, y: 1100, label: '🚌 CBD站', target: 'SuburbScene', targetX: 900, targetY: 700, cost: 10 },
+      { x: 1100, y: 420, label: '🚌 市政府站', target: 'BeachScene', targetX: 1100, targetY: 500, cost: 10 },
+      { x: 300, y: 420, label: '🚌 金融街站', target: 'CommercialScene', targetX: 900, targetY: 700, cost: 10 },
+    ];
+
     super.create();
   }
 

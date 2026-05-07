@@ -40,6 +40,11 @@ class CommercialScene extends ZoneScene {
       { id: 'mei_ling', x: 850, y: 770, color: 0xcc88ff, name: '美玲', role: '护士', greetings: ['工作太累了，来放松一下。', '健康很重要哦。', '你看起来气色不错！'] },
     ];
 
+    this.busStops = [
+      { x: 900, y: 1350, label: '🚌 商业街站', target: 'SuburbScene', targetX: 900, targetY: 800, cost: 10 },
+      { x: 300, y: 650, label: '🚌 西口站', target: 'DowntownScene', targetX: 1200, targetY: 800, cost: 10 },
+    ];
+
     super.create();
   }
 

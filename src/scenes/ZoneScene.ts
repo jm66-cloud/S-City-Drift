@@ -49,6 +49,8 @@ export class ZoneScene extends Phaser.Scene {
   protected sidewalkColor = 0x9a9a8e;
   protected bgmKey = 'bgm-daily1';
   protected dayNight = 12; // 0-24, 默认白天
+  protected weather = 'sunny'; // sunny | rain
+  protected busStops: Array<{ x: number; y: number; label: string; target: string; targetX: number; targetY: number; cost: number }> = [];
   private inTransition = false;
   private currentBGM: Phaser.Sound.BaseSound | null = null;
   private walkers: Phaser.GameObjects.Graphics[] = [];
@@ -76,6 +78,7 @@ export class ZoneScene extends Phaser.Scene {
     this.createInput();
     this.createHUD();
     this.createWalkers();
+    this.placeBusStops();
     this.createDayNight();
     this.playBGM();
 
@@ -249,8 +252,10 @@ export class ZoneScene extends Phaser.Scene {
 
     if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
       if (!this.tryExitZone()) {
-        if (!this.tryEnterBuilding()) {
-          this.tryTalkToNPC();
+        if (!this.tryUseBus()) {
+          if (!this.tryEnterBuilding()) {
+            this.tryTalkToNPC();
+          }
         }
       }
     }
@@ -427,11 +432,92 @@ export class ZoneScene extends Phaser.Scene {
     }
   }
 
+  // ============ 公交 ============
+  private placeBusStops(): void {
+    this.busStops.forEach(stop => {
+      const gfx = this.add.graphics().setDepth(3);
+      gfx.fillStyle(0x446644, 0.8);
+      gfx.fillRoundedRect(stop.x - 20, stop.y - 12, 40, 24, 4);
+      gfx.lineStyle(2, 0x88cc88);
+      gfx.strokeRoundedRect(stop.x - 20, stop.y - 12, 40, 24, 4);
+      this.add.text(stop.x, stop.y + 16, stop.label, {
+        fontFamily: 'sans-serif', fontSize: '10px', color: '#aaffaa',
+        backgroundColor: '#00000099', padding: { x: 3, y: 1 },
+      }).setOrigin(0.5, 0).setDepth(4);
+    });
+  }
+
+  private tryUseBus(): boolean {
+    const px = this.player.x;
+    const py = this.player.y;
+    for (const stop of this.busStops) {
+      if (Math.abs(px - stop.x) < 35 && Math.abs(py - stop.y) < 25) {
+        this.showBusMenu(stop);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private showBusMenu(stop: typeof this.busStops[0]): void {
+    this.scene.pause();
+    this.input.keyboard!.enabled = false;
+
+    const box = this.add.rectangle(640, 360, 500, 300, 0x222244).setDepth(200).setStrokeStyle(3, 0x6666aa).setScrollFactor(0);
+    this.add.text(640, 240, `🚌 ${stop.label} — 公交车`, {
+      fontFamily: 'sans-serif', fontSize: '20px', color: '#ffcc00',
+    }).setOrigin(0.5).setDepth(201).setScrollFactor(0);
+    this.add.text(640, 280, `目的地: ${stop.target}站  |  费用: ¥${stop.cost}`, {
+      fontFamily: 'sans-serif', fontSize: '14px', color: '#aaaacc',
+    }).setOrigin(0.5).setDepth(201).setScrollFactor(0);
+
+    const goBtn = this.add.rectangle(400, 360, 180, 36, 0x336633).setDepth(201).setInteractive({ useHandCursor: true }).setScrollFactor(0);
+    this.add.text(400, 360, '🚌 乘坐', {
+      fontFamily: 'sans-serif', fontSize: '16px', color: '#ffffff',
+    }).setOrigin(0.5).setDepth(202).setScrollFactor(0);
+    goBtn.on('pointerdown', () => {
+      this.inTransition = true;
+      this.scene.resume();
+      this.input.keyboard!.enabled = true;
+      this.cameras.main.fadeOut(500, 0, 0, 0);
+      this.cameras.main.once('camerafadeoutcomplete', () => {
+        this.scene.start(stop.target, { startX: stop.targetX, startY: stop.targetY });
+      });
+    });
+
+    const cancelBtn = this.add.rectangle(600, 360, 180, 36, 0x663333).setDepth(201).setInteractive({ useHandCursor: true }).setScrollFactor(0);
+    this.add.text(600, 360, '✖ 取消', {
+      fontFamily: 'sans-serif', fontSize: '16px', color: '#ffffff',
+    }).setOrigin(0.5).setDepth(202).setScrollFactor(0);
+    cancelBtn.on('pointerdown', () => {
+      this.scene.resume();
+      this.input.keyboard!.enabled = true;
+      box.destroy();
+    });
+  }
+
   // ============ 昼夜 ============
   private createDayNight(): void {
     const overlay = this.add.rectangle(this.worldWidth / 2, this.worldHeight / 2,
       this.worldWidth * 3, this.worldHeight * 3, 0x000022).setDepth(99).setAlpha(0);
     overlay.setName('daynight');
+    this.createWeather();
+  }
+
+  private createWeather(): void {
+    if (this.weather !== 'rain') return;
+    const particles = this.add.particles(this.worldWidth / 2, 0, 'player-zone', {
+      x: { min: 0, max: this.worldWidth },
+      y: { min: -20, max: -5 },
+      speedY: { min: 180, max: 280 },
+      speedX: { min: -20, max: 20 },
+      scale: { start: 0.03, end: 0.01 },
+      alpha: { start: 0.3, end: 0 },
+      frequency: 20,
+      lifespan: 1500,
+      tint: 0xaaccff,
+    });
+    particles.setDepth(98).setName('rain');
   }
 
   private updateDayNight(): void {

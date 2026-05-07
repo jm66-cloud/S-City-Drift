@@ -35,6 +35,11 @@ class SuburbScene extends ZoneScene {
       { id: 'xiao_li', x: 1400, y: 520, color: 0x88ccff, name: '小李', role: '程序员', greetings: ['996真的好累...', '要不要一起创业？', '我写了个人工智能炒股模型。'] },
     ];
 
+    this.busStops = [
+      { x: 400, y: 1600, label: '🚌 住宅区站', target: 'DowntownScene', targetX: 900, targetY: 1200, cost: 10 },
+      { x: 1700, y: 1200, label: '🚌 湖边站', target: 'CommercialScene', targetX: 900, targetY: 1300, cost: 10 },
+    ];
+
     super.create();
   }
 

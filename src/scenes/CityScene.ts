@@ -1,6 +1,7 @@
 import * as Phaser from 'phaser';
 import { GameState } from '../core/GameState';
 import { sceneManager } from '../core/SceneManager';
+import { NPC_DATA, getRandomGreeting } from '../data/NPCData';
 
 interface BuildingInfo {
   x: number;
@@ -118,9 +119,10 @@ class CityScene extends Phaser.Scene {
       { x: 200, y: 200, label: '🏠 公寓', color: 0x663931, scene: 'ApartmentScene' },
       { x: 640, y: 200, label: '📈 交易所', color: 0xdf7126, scene: 'ExchangeScene' },
       { x: 960, y: 200, label: '🏪 便利店', color: 0x45283c, scene: 'StoreScene' },
-      { x: 300, y: 600, label: '🏦 银行', color: 0x37946e, scene: 'CityScene' },
-      { x: 800, y: 600, label: '☕ 咖啡馆', color: 0x222034, scene: 'CityScene' },
-      { x: 300, y: 1000, label: '🏥 医院', color: 0xffffff, scene: 'CityScene' },
+      { x: 300, y: 600, label: '🏦 银行', color: 0x37946e, scene: 'BankScene' },
+      { x: 800, y: 600, label: '☕ 咖啡馆', color: 0x222034, scene: 'CafeScene' },
+      { x: 550, y: 600, label: '💼 办公室', color: 0x666633, scene: 'OfficeScene' },
+      { x: 300, y: 1000, label: '🏥 医院', color: 0x8899cc, scene: 'HospitalScene' },
       { x: 800, y: 1000, label: '📚 图书馆', color: 0x8b7355, scene: 'CityScene' },
       { x: 1300, y: 400, label: '🏖 沙滩', color: 0xd4a96a, scene: 'CityScene' },
       { x: 1300, y: 1000, label: '📍 灯塔', color: 0xffec27, scene: 'CityScene' },
@@ -167,23 +169,22 @@ class CityScene extends Phaser.Scene {
   // ==== NPC 占位 ====
 
   private createNPCs(): void {
-    // 王阿姨 — 住宅区
-    this.add.rectangle(150, 300, 20, 28, 0xffaaaa).setDepth(9);
-    this.add.text(150, 320, '王阿姨', {
-      fontFamily: 'sans-serif', fontSize: '10px', color: '#ffffff',
-    }).setOrigin(0.5, 0).setDepth(10);
+    NPC_DATA.forEach(npc => {
+      const marker = this.add.rectangle(npc.x, npc.y, 20, 28, npc.color).setDepth(9);
+      marker.setStrokeStyle(1, 0xffffff);
 
-    // 阿强 — 交易所附近
-    this.add.rectangle(680, 300, 20, 28, 0xaaaaff).setDepth(9);
-    this.add.text(680, 320, '阿强', {
-      fontFamily: 'sans-serif', fontSize: '10px', color: '#ffffff',
-    }).setOrigin(0.5, 0).setDepth(10);
+      const label = this.add.text(npc.x, npc.y + 18, npc.name, {
+        fontFamily: 'sans-serif', fontSize: '10px', color: '#ffffff',
+        backgroundColor: '#00000099', padding: { x: 3, y: 1 },
+      }).setOrigin(0.5, 0).setDepth(10);
 
-    // 小琳 — 咖啡馆附近
-    this.add.rectangle(780, 680, 20, 28, 0xffccaa).setDepth(9);
-    this.add.text(780, 700, '小琳', {
-      fontFamily: 'sans-serif', fontSize: '10px', color: '#ffffff',
-    }).setOrigin(0.5, 0).setDepth(10);
+      // 按E对话
+      const dialogPopup = this.add.text(640, 660, '', {
+        fontFamily: 'sans-serif', fontSize: '14px', color: '#ffffff',
+        backgroundColor: '#000000cc', padding: { x: 12, y: 8 },
+        align: 'center',
+      }).setOrigin(0.5, 0.5).setDepth(50).setVisible(false).setScrollFactor(0);
+    });
   }
 
   // ==== 输入 ====
@@ -212,15 +213,39 @@ class CityScene extends Phaser.Scene {
     if (this.cursors.up.isDown || this.wasd.up.isDown) body.setVelocityY(-speed);
     else if (this.cursors.down.isDown || this.wasd.down.isDown) body.setVelocityY(speed);
 
-    // 建筑交互
+    // 建筑交互 / NPC对话
     if (Phaser.Input.Keyboard.JustDown(this.interactKey)) {
-      this.tryEnterBuilding();
+      if (!this.tryInteractNPC()) {
+        this.tryEnterBuilding();
+      }
     }
 
     // ESC 打开菜单
     if (Phaser.Input.Keyboard.JustDown(this.escKey)) {
       this.openPauseMenu();
     }
+  }
+
+  private tryInteractNPC(): boolean {
+    const px = this.player.x;
+    const py = this.player.y;
+
+    for (const npc of NPC_DATA) {
+      const dx = Math.abs(px - npc.x);
+      const dy = Math.abs(py - npc.y);
+      if (dx < 50 && dy < 50) {
+        const greeting = getRandomGreeting(npc.id);
+        const dialog = this.add.text(640, 660, `[${npc.name}] ${npc.role}\n"${greeting}"`, {
+          fontFamily: 'sans-serif', fontSize: '14px', color: '#ffffff',
+          backgroundColor: '#000000dd', padding: { x: 16, y: 10 },
+          align: 'center', wordWrap: { width: 600 },
+        }).setOrigin(0.5, 0.5).setDepth(50).setScrollFactor(0);
+
+        this.time.delayedCall(3000, () => dialog.destroy());
+        return true;
+      }
+    }
+    return false;
   }
 
   private tryEnterBuilding(): void {

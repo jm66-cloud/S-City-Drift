@@ -12,6 +12,12 @@ import OfficeScene from './scenes/OfficeScene';
 import CafeScene from './scenes/CafeScene';
 import BankScene from './scenes/BankScene';
 import HospitalScene from './scenes/HospitalScene';
+import LibraryScene from './scenes/LibraryScene';
+import RestaurantScene from './scenes/RestaurantScene';
+import PoliceScene from './scenes/PoliceScene';
+import KTVScene from './scenes/KTVScene';
+import BarScene from './scenes/BarScene';
+import PhoneScene from './scenes/PhoneScene';
 import PauseScene from './scenes/PauseScene';
 
 const config: Phaser.Types.Core.GameConfig = {
@@ -40,6 +46,12 @@ const config: Phaser.Types.Core.GameConfig = {
     CafeScene,
     BankScene,
     HospitalScene,
+    LibraryScene,
+    RestaurantScene,
+    PoliceScene,
+    KTVScene,
+    BarScene,
+    PhoneScene,
     PauseScene,
   ],
   physics: {

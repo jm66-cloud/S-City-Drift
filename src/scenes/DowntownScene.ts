@@ -29,6 +29,8 @@ class DowntownScene extends ZoneScene {
       { x: 600, y: 650, label: '⚖️ 证监局', color: 0x666688, scene: 'DowntownScene' },
       { x: 900, y: 650, label: '🏢 CBD大厦', color: 0x5588aa, scene: 'DowntownScene' },
       { x: 350, y: 1000, label: '📰 新闻社', color: 0xaa7744, scene: 'DowntownScene' },
+      { x: 1300, y: 900, label: '📚 图书馆', color: 0x8b7355, scene: 'LibraryScene' },
+      { x: 200, y: 1200, label: '👮 派出所', color: 0x556688, scene: 'PoliceScene' },
     ];
 
     this.npcData = [

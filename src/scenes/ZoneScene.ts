@@ -228,6 +228,7 @@ export class ZoneScene extends Phaser.Scene {
     };
     this.interactKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.E);
     this.escKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+    this.input.keyboard!.on('keydown-TAB', () => this.openPhone());
   }
 
   // ============ HUD ============
@@ -311,6 +312,11 @@ export class ZoneScene extends Phaser.Scene {
   }
 
   // ============ 辅助方法 ============
+  private openPhone(): void {
+    this.scene.pause();
+    this.scene.launch('PhoneScene', { returnScene: this.scene.key });
+  }
+
   private playBGM(): void {
     try {
       if (this.cache.audio.exists(this.bgmKey)) {

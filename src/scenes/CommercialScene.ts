@@ -27,11 +27,11 @@ class CommercialScene extends ZoneScene {
       { x: 600, y: 250, label: '☕ 咖啡馆', color: 0x8b6914, scene: 'CafeScene' },
       { x: 950, y: 250, label: '👔 服装店', color: 0x994488, scene: 'CommercialScene' },
       { x: 1300, y: 250, label: '📱 手机店', color: 0x888888, scene: 'CommercialScene' },
-      { x: 400, y: 700, label: '🍜 餐厅', color: 0xcc6644, scene: 'CommercialScene' },
+      { x: 400, y: 700, label: '🍜 餐厅', color: 0xcc6644, scene: 'RestaurantScene' },
       { x: 800, y: 700, label: '💇 理发店', color: 0x4488cc, scene: 'CommercialScene' },
-      { x: 1200, y: 700, label: '🍺 酒吧', color: 0x664433, scene: 'CommercialScene' },
+      { x: 1200, y: 700, label: '🍺 酒吧', color: 0x664433, scene: 'BarScene' },
       { x: 600, y: 1150, label: '🎬 电影院', color: 0x334466, scene: 'CommercialScene' },
-      { x: 1100, y: 1150, label: '🎮 游戏厅', color: 0x663366, scene: 'CommercialScene' },
+      { x: 1100, y: 1150, label: '🎤 KTV', color: 0x663366, scene: 'KTVScene' },
     ];
 
     this.npcData = [

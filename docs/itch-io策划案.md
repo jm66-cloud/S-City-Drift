@@ -1,7 +1,7 @@
 # 「申海漂」— itch.io 完整策划案
 
-> 目标平台：itch.io（Web 版 + Electron 桌面版）
-> 技术栈：Phaser 3 + Electron + TypeScript + Vite + Tiled
+> 目标平台：itch.io（Web 版 + Godot 原生桌面版）
+> 技术栈：Godot 4 + GDScript + Godot TileMap
 > 玩法类型：**类星露谷物语**——俯视角2D城市生活模拟
 
 ---
@@ -20,53 +20,53 @@
 |------|------|
 | 品类 | 俯视角2D城市生活模拟 + 财富养成 |
 | 视角 | **俯视角 2D**，角色在地图上自由行走 |
-| 目标平台 | itch.io (Web + Electron 桌面) |
+| 目标平台 | itch.io (Web + Godot 原生桌面) |
 | 游戏时长 | ∞ 无限游玩，没有通关概念 |
 | 核心爽点 | 探索城市、炒股暴富、布置自己的家 |
-| 存档方式 | localStorage (Web) / JSON 文件 (Electron) |
+| 存档方式 | JSON 文件 (FileAccess, user:// 路径) |
 
 ### 1.3 技术栈
 
 | 层 | 技术 | 职责 |
 |------|------|------|
-| **运行时** | **Electron** | 跨平台桌面应用 (Windows/Mac/Linux) |
-| **游戏引擎** | **Phaser 3** | 瓦片地图渲染、角色移动碰撞、NPC行走、动画、相机跟随 |
-| **UI 层** | **HTML/CSS + TypeScript** | 炒股界面K线、对话框、背包、设置——Phaser overlay |
-| **语言** | **TypeScript** | 全栈类型安全 |
-| **构建工具** | **Vite** | 开发服务器、热重载、打包 |
-| **地图编辑** | **Tiled** | 绘制瓦片地图 (.tmj 格式) |
-| **数据存储** | **本地 JSON / SQLite** | 通过 Electron fs 模块读写 |
+| **运行时** | **Godot 4** | 跨平台原生导出 (Windows/Mac/Linux/Web) |
+| **游戏引擎** | **Godot 4** | 瓦片地图(TileMap)、角色移动碰撞(Area2D)、NPC寻路(NavigationAgent2D)、动画(AnimationPlayer)、相机跟随(Camera2D) |
+| **UI 层** | **Godot Control 节点** | 炒股界面K线(CanvasItem绘图)、对话框、背包、设置——Control节点覆盖层 |
+| **语言** | **GDScript / C#** | 开发高效，原生 Godot 集成 |
+| **构建工具** | **Godot 内置** | 一键导出多平台 |
+| **地图编辑** | **Godot TileMap** | 内置瓦片地图编辑器，支持多层/碰撞/自动瓦片 |
+| **数据存储** | **本地 JSON 文件** | Godot FileAccess + JSON 序列化 |
 
-### 1.4 Phaser 3 分工
+### 1.4 Godot 4 分工
 
 ```
-Phaser 3 (游戏世界渲染):
+Godot 4 (游戏世界渲染):
 ┌──────────────────────────────────────────────┐
-│  瓦片地图加载渲染 (Tiled JSON 原生支持)       │
-│  角色精灵 + 行走动画 + 碰撞检测              │
-│  NPC AI + 日程路径 + 寻路                    │
-│  相机跟随玩家 + 平滑缩放                     │
-│  建筑出入过渡 (室内/室外切换)                │
-│  光影/天气粒子效果                           │
-│  Y轴排序 (深度遮挡)                          │
+│  TileMap 瓦片地图渲染 (内置 TileSet 编辑器)   │
+│  CharacterBody2D 角色移动 + 碰撞检测         │
+│  NavigationAgent2D NPC AI + 日程路径 + 寻路  │
+│  Camera2D 跟随玩家 + 平滑缩放                │
+│  建筑出入过渡 (场景切换, 淡入淡出)            │
+│  GPUParticles2D 光影/天气粒子效果             │
+│  YSort2D 节点 (自动深度遮挡排序)              │
 └──────────────────────────────────────────────┘
 
-HTML/CSS + TS (UI覆盖层):
+Godot Control 节点 (UI覆盖层):
 ┌──────────────────────────────────────────────┐
-│  K线/分时走势图 (Canvas2D/SVG)               │
-│  NPC 对话框 + 选项按钮                       │
-│  背包界面 + 物品拖拽                         │
+│  K线/分时走势图 (CanvasItem.draw API)        │
+│  NPC 对话框 + 选项按钮 (Control 节点)        │
+│  背包界面 + 物品拖拽 (GridContainer)         │
 │  暂停菜单 + 设置面板                         │
 │  手机界面 (内置炒股App)                      │
 │  小地图 (Minimap)                            │
-│  HUD: 时间/属性/金钱 (始终置顶)              │
+│  HUD: 时间/属性/金钱 (CanvasLayer 置顶)      │
 └──────────────────────────────────────────────┘
 
-Phaser ↔ UI 通信:
-  Phaser 事件 → UI更新
-    (玩家走到交易所 → UI打开炒股面板)
-  UI操作 → Phaser 反馈
-    (UI买入股票 → Phaser 播放买入粒子特效)
+Godot 信号 ↔ 方法调用 (替代 Phaser ↔ UI 通信):
+  Godot 信号 → UI更新:
+    (玩家走到交易所 → Signal 发出 open_trade_panel → UI打开炒股面板)
+  UI操作 → Godot 反馈:
+    (UI买入股票 → 调用 GameManager.buy_stock() → Godot 播放买入粒子特效)
 ```
 
 ### 1.5 与星露谷物语的核心差异
@@ -114,7 +114,7 @@ BGM: 主题曲 (轻松城市风格)
 
 首次启动检查:
   ├── 检测 localStorage 是否有存档 → 有则"继续游戏"亮起
-  └── 检测 Web/Electron 环境 → 选择对应的存档方式
+  └── Godot FileAccess 自动处理 Web/桌面存档路径 (user:// 统一)
 ```
 
 ### 1.7 角色创建
@@ -651,8 +651,8 @@ v1公共设施清单:
 
 实现方案:
   ├── 每个季节一套 tileset 变体 (或 叠加色调滤镜)
-  ├── 粒子系统: 花瓣/落叶/雪花 (Phaser particle emitter)
-  ├── 光照: CSS filter / Phaser camera tint
+  ├── 粒子系统: 花瓣/落叶/雪花 (Godot GPUParticles2D)
+  ├── 光照: CanvasModulate 全局色调 / DirectionalLight2D
   ├── NPC服装: 换季时自动切换 spritesheet
   └── 性能: 季节变化只加载当前季节的纹理
 
@@ -705,7 +705,7 @@ v1公共设施清单:
   └── 配件: 背包/伞/购物袋 (随机概率)
 
 实现方案:
-  ├── 路人使用 Phaser sprite + 简单动画 (4方向行走)
+  ├── 路人使用 Godot AnimatedSprite2D + 简单动画 (4方向行走)
   ├── 不参与碰撞系统 (可穿透, 不与玩家碰撞)
   ├── 只在 CityScene 中生成
   ├── 视野外自动销毁 (性能优化)
@@ -717,7 +717,7 @@ v1公共设施清单:
   ├── 🐱 流浪猫: 住宅区/商业街后巷 (可收养)
   ├── 🚗 行驶车辆: 主干道随机车辆 (纯视觉)
   ├── 🚲 路边自行车: 随机停放的自行车 (装饰)
-  ├── 🌊 海浪效果: 东沙滩/港口 (Phaser粒子系统)
+  ├── 🌊 海浪效果: 东沙滩/港口 (Godot GPUParticles2D)
   └── 💡 灯光闪烁: 夜晚城市灯光 (动画tile)
 ```
 
@@ -779,9 +779,9 @@ v1公共设施清单:
 
 ### 2.4 建筑室内场景完整清单
 
-以下为第一版需实现的所有可进入建筑及对应Phaser Scene:
+以下为第一版需实现的所有可进入建筑及对应 Godot Scene:
 
-| 优先级 | 场景 | Phaser Scene | 对应建筑 | 复杂度 |
+| 优先级 | 场景 | Godot Scene | 对应建筑 | 复杂度 |
 |--------|------|-------------|---------|--------|
 | P0 | 公寓层1 | ApartmentScene_L1 | 出租屋(初始家) | 中 |
 | P0 | 交易所 | ExchangeScene | 证券交易所 | 高 |
@@ -2341,8 +2341,8 @@ NPC移动模式:
     └── 冬季: NPC户外时间-1h (冷, 早回家)
 
 寻路实现方案:
-  ├── 使用Phaser Arcade物理 + Tilemap碰撞层
-  ├── 简易A*寻路 (在Tiled碰撞层上计算)
+  ├── 使用 Godot NavigationAgent2D (NavigationRegion2D 自动寻路)
+  ├── TileMap 碰撞层自动烘焙 NavigationPolygon
   ├── 每5秒重新计算一次路径 (减少性能开销)
   ├── 如果NPC在家/在室内 → 不可见 (从地图上移除)
   └── 优化: 视野外的NPC使用简化位置更新 (每30秒一次)
@@ -2357,7 +2357,7 @@ NPC可见性:
   ├── 同时活跃NPC: 8-12个 (地图上可见)
   ├── NPC更新频率: 每3秒一次路径检查
   ├── 碰撞检测: 玩家↔NPC可碰撞 (挡住NPC), NPC↔NPC不碰撞
-  └── Phaser对象池: 复用NPC精灵, 进出场景时激活/休眠
+  └── 对象池: Godot 实例池复用NPC场景, 进出场景时激活/休眠
 
 日程调度引擎 (伪代码实现):
 ```typescript
@@ -2484,7 +2484,7 @@ class NPCScheduler {
   ├── 不送礼物: NPC期待落空, 好感-5
   └── 特殊: 如果玩家当天也是生日 → 对话触发"好巧, 我们同一天生日"
 
-日程数据格式 (TypeScript):
+日程数据格式 (参考 GDScript):
   interface NPCSchedule {
     npcId: string;
     weekday: TimeSlot[];      // 周一~周六
@@ -3363,8 +3363,8 @@ interface Gossip {
     ├── 🏗️ 扩张 (分公司/子公司)
     └── 📈 上市 (IPO流程)
 
-公司管理界面全部在 HTML/CSS 覆盖层中实现
-Phaser 负责"走到大楼→进入场景"的沉浸感
+公司管理界面全部在 Godot Control 节点层中实现
+场景切换负责"走到大楼→进入场景"的沉浸感
 ```
 
 #### 6.2.2 公司法律形式 (3级)
@@ -5461,7 +5461,7 @@ class NotificationManager {
   show(notification: AchievementNotification): void;
   private showNext(): void;
   private createElement(notification: AchievementNotification): HTMLElement;
-  // 使用 HTML overlay 渲染, 不依赖 Phaser
+  // Godot Control 节点渲染成就通知, 与场景分离
 }
 ```
 
@@ -5630,6 +5630,66 @@ Day365 申海首富        ¥500,000+/天  排行榜登顶        无
   - 但如果玩家完全不想打工 → 可以靠初始¥100,000撑约32个月
   - 32个月≈游戏内960天≈现实约80h游戏时间, 足够玩家熟悉系统
   - 所以经济压力是"温水煮青蛙"——不急但一直在
+```
+
+### 11.6 素材代码生成管线
+
+鉴于本项目所有像素素材均通过 Godot 代码生成，不走外部素材管线，本节定义完整的代码生成架构。
+
+```
+设计原则:
+  ├── 运行时生成 + 编辑器预生成 (编辑器插件预览, 运行时按需生成)
+  ├── 所有素材统一使用 DawnBringer 32 (DB32) 调色板
+  ├── 像素对齐: 32×32 瓦片基准, 16×32 角色尺寸
+  └── 分层合成: 基础层 → 细节层 → 色调叠加
+
+核心文件:
+  src/autoload/asset_generator.gd    # 素材生成总控制器 (Autoload)
+  src/procedural_assets/
+    ├── palette.gd                    # DB32 色板 + 调色板工具函数
+    ├── tile_generator.gd             # 地形/道路/水域/装饰瓦片
+    ├── building_generator.gd         # 建筑墙面/窗户/屋顶
+    ├── character_generator.gd        # 角色/NPC 像素 (4方向行走图)
+    ├── furniture_generator.gd        # 室内家具/家电/装饰
+    ├── ui_icon_generator.gd          # UI 图标/按钮/面板纹理
+    ├── sprite_generator.gd           # 通用精灵合成器
+    └── effects.gd                    # 特效纹理 (粒子/火花/雨水)
+
+瓦片生成管线:
+  TileGenerator
+    ├── set_pixel() 逐像素绘制瓦片 (32×32)
+    ├── 自动地形识别: 根据邻接瓦片编号生成过渡
+    ├── 输出: Image → ImageTexture → TileSet
+    └── 缓存: 生成后存入内存 Texture 缓存, 避免重复生成
+
+角色生成管线:
+  CharacterGenerator
+    ├── 身体模板 (基础像素块)
+    ├── 发型/服装/肤色分层
+    ├── 4方向行走帧 (下/左/右/上 各4帧)
+    ├── DB32 颜色映射 (换色)
+    └── 输出: SpriteFrames → AnimatedSprite2D
+
+建筑生成管线:
+  BuildingGenerator
+    ├── 墙面纹理 (随机砖块/水泥纹理)
+    ├── 窗户布局 (根据建筑类型/层数)
+    ├── 屋顶/招牌/装饰
+    └── 夜间模式 (窗户亮灯)
+
+技术规格:
+  ├── 画布: 32×32 (瓦片), 16×32 (角色), 48×48 (家具)
+  ├── 调色板: DB32 固定32色, 运行时不可更改
+  ├── 格式: Image.FORMAT_RGBA8
+  ├── 滤波: 最近邻 (nearest) 保持像素清晰
+  └── 性能: 单瓦片生成 < 0.1ms, 全 TileSet 生成 < 100ms
+
+编辑器集成:
+  ├── Godot EditorPlugin 注册
+  ├── 编辑器侧边栏: 选择生成器类型 + 参数
+  ├── 实时预览: 调整参数 → 重新生成 → 显示效果
+  ├── 导出: 生成结果可导出为 .png 文件 (可选)
+  └── 运行时: AssetGenerator 启动时自动生成全部素材
 ```
 
 ---
@@ -5835,8 +5895,7 @@ interface SaveData {
   - 手机 → 设置 → 保存存档
 
 存档位置:
-  - Web版: localStorage (键: 'shenhaipiao_save')
-  - Electron版: JSON文件 (userData/saves/*.json)
+  - Godot FileAccess: user://saves/*.json (Web/桌面统一路径)
 
 存档管理:
   - 最多3个手动存档槽位
@@ -5849,220 +5908,313 @@ interface SaveData {
 
 ## 十五、渲染架构
 
-### 15.1 Phaser 3 + HTML/CSS 分工
+### 15.1 Godot 节点树架构
+
+整个游戏以 Godot 4 场景树为核心，所有元素都是节点。
 
 ```
-Phaser 3 — 游戏世界渲染 (Canvas):
+Godot 4 主场景树:
 
-  Layer 0: 地面瓦片 (grass/road/sidewalk/floor)
-  Layer 1: 建筑瓦片 (walls/roofs/doors)
-  Layer 2: 装饰层 (trees/lamp posts/benches)
-  Layer 3: 角色层 (玩家 + NPC, 按Y轴排序)
-  Layer 4: 覆盖层 (半透明屋顶/阴影)
+Game (Node)                              ← 游戏根节点
+├── WorldContainer (Node2D)              ← 游戏世界容器
+│   ├── CityMap (TileMapLayer)           ← 城市户外地图
+│   │   ├── Layer0_地面                   ← 草地/道路/人行道
+│   │   ├── Layer1_建筑                   ← 墙壁/屋顶/门
+│   │   ├── Layer2_装饰                   ← 树木/路灯/长椅
+│   │   ├── Layer3_覆盖                   ← 半透明屋顶/阴影
+│   │   └── NavigationRegion2D           ← NPC寻路导航网格
+│   │
+│   ├── CharacterLayer (YSort2D)         ← Y轴排序, 角色按前后自动遮挡
+│   │   ├── Player (CharacterBody2D)     ← 玩家角色
+│   │   │   ├── CollisionShape2D         ← 碰撞体
+│   │   │   ├── AnimatedSprite2D         ← 行走动画 (4方向 × 4帧)
+│   │   │   └── Camera2D                 ← 跟随玩家的相机
+│   │   └── NPCs/                        ← 场景内NPC实例
+│   │       ├── NPC_WangAyi (CharacterBody2D)
+│   │       ├── NPC_AQiang (CharacterBody2D)
+│   │       └── ...
+│   │
+│   ├── BuildingTriggers/               ← 建筑入口触发区
+│   │   ├── ExchangeDoor (Area2D)        ← 证交所入口
+│   │   ├── StoreDoor (Area2D)           ← 便利店入口
+│   │   └── ...
+│   │
+│   ├── WeatherSystem (Node2D)           ← 天气粒子系统
+│   │   ├── GPUParticles2D_rain          ← 雨粒子
+│   │   ├── GPUParticles2D_snow          ← 雪粒子
+│   │   └── GPUParticles2D_leaves        ← 落叶/花瓣
+│   │
+│   └── DayNightCycle (CanvasModulate)   ← 昼夜色调覆盖
+│
+├── UI (CanvasLayer)                     ← UI层, 始终在游戏世界上方
+│   ├── HUD                              ← 时间/属性/金钱显示
+│   │   ├── TimeLabel (Label)
+│   │   ├── HungerBar (TextureProgressBar)
+│   │   ├── EnergyBar (TextureProgressBar)
+│   │   ├── StressBar (TextureProgressBar)
+│   │   └── MoneyLabel (Label)
+│   │
+│   ├── DialogBox (Panel)               ← NPC对话框
+│   ├── StockPanel (Panel)              ← 炒股界面
+│   │   ├── KLineCanvas (Control)       ← K线绘图区 (draw回调)
+│   │   └── TradeControls (HBoxContainer)
+│   │
+│   ├── Inventory (Panel)               ← 背包
+│   ├── Phone (Panel)                   ← 手机界面 (全屏)
+│   └── Menu (Panel)                    ← 暂停/设置
+│
+└── AudioManager (Node)                 ← 音频管理
+    ├── BGMAudio (AudioStreamPlayer)     ← BGM播放器
+    └── SFXAudio (AudioStreamPlayer)     ← 音效播放器
 
-  ├── 地图: Tiled JSON → Phaser tilemap 原生加载
-  ├── 角色: Phaser sprite + arcade physics
-  ├── 碰撞: Phaser arcade body
-  ├── 相机: Phaser camera (跟随玩家 + 缩放)
-  └── 过渡: Phaser scene 切换 (室内↔室外)
-
-HTML/CSS + TypeScript — UI 覆盖层 (置于 Phaser canvas 上方):
-
-  ├── HUD: position:absolute, pointer-events:none
-  │   透过点击事件让操作穿透到 Phaser
-  ├── 对话框: pointer-events:auto
-  ├── 炒股界面: 独立的半屏覆盖层
-  ├── 背包: 网格布局覆盖层
-  └── 设置/菜单: 全屏覆盖层
+Godot 节点特性:
+  ├── TileMapLayer: 原生多层瓦片地图, 支持自动瓦片/碰撞/导航
+  ├── YSort2D: 自动按Y轴排序子节点, 实现深度遮挡
+  ├── CharacterBody2D: 内置移动+碰撞, 无需额外物理引擎
+  ├── Camera2D: 跟随玩家+平滑缩放+限制边界
+  ├── CanvasLayer: UI独立分层, 不受游戏世界相机影响
+  ├── GPUParticles2D: GPU粒子, 适合雨/雪/花瓣效果
+  └── AnimationPlayer: 时间轴动画, 用于过场/UI动画
 ```
 
-### 15.2 Phaser 3 核心配置
+### 15.2 Godot 项目核心配置
 
-```typescript
-const config: Phaser.Types.Core.GameConfig = {
-  type: Phaser.AUTO,
-  width: 1280,
-  height: 720,
-  parent: 'game-container',
-  physics: {
-    default: 'arcade',
-    arcade: {
-      gravity: { x: 0, y: 0 },
-      debug: false
-    }
-  },
-  scene: [BootScene, CityScene, ApartmentScene, ExchangeScene]
-};
+```gdscript
+# project.godot (核心配置)
+[application]
+config/name="申海漂"
+config/description="一座海岛，一个机会。俯视角2D海岛城市生活模拟游戏。"
+run/main_scene="res://scenes/title/TitleScene.tscn"
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/mode=2             # 窗口模式
+window/size/stretch/mode="viewport"
+window/size/stretch/aspect="keep"
+
+[input]
+wasd_left={ "deadzone": 0.5, "events": [ ... ] }
+wasd_right={ "deadzone": 0.5, "events": [ ... ] }
+wasd_up={ "deadzone": 0.5, "events": [ ... ] }
+wasd_down={ "deadzone": 0.5, "events": [ ... ] }
+interact={ "deadzone": 0.5, "events": [ ... ] }     # E键
+inventory={ "deadzone": 0.5, "events": [ ... ] }    # I键
+phone={ "deadzone": 0.5, "events": [ ... ] }        # M键
+pause={ "deadzone": 0.5, "events": [ ... ] }        # Esc键
 ```
 
-### 15.3 场景 (Scene) 结构
+### 15.3 场景 (Scene) 列表
+
+每个场景是一个独立的 `.tscn` 文件, 在 Godot 编辑器中可视化编辑。
 
 ```
-Phaser Scene 列表:
+场景文件清单:
 
-  ├── BootScene         启动/加载资源
-  ├── CityScene         申海市户外主地图
-  │   ├── tilemap + sprites + NPCs + player
-  │   └── 建筑入口触发 → 切换到室内 Scene
-  ├── ApartmentScene    玩家公寓室内
-  │   ├── 不同等级对应不同室内布局
-  │   └── 出门 → 回到 CityScene
-  ├── ExchangeScene     证券交易所大户室
-  │   ├── 大屏K线展示 (Phaser graphics)
-  │   └── 打开交易面板 → UI 层覆盖
-  ├── StoreScene        便利店室内
-  ├── OfficeScene       公司办公室
-  ├── CafeScene         咖啡馆
-  └── ...
+  title/TitleScene.tscn                 主菜单/标题画面
+  character/CharacterCreateScene.tscn    角色创建
+  city/CityScene.tscn                    申海市户外主地图 (核心场景)
+  interior/Apartment_L1.tscn             出租屋 (阶段1)
+  interior/Apartment_L2.tscn             整租一居室 (阶段2)
+  interior/Apartment_L3.tscn             精装公寓 (阶段3)
+  interior/Apartment_L4.tscn             海景别墅 (阶段4)
+  interior/ExchangeScene.tscn            证券交易所
+  interior/StoreScene.tscn               便利店
+  interior/OfficeScene.tscn              公司办公室
+  interior/CafeScene.tscn                海风咖啡馆
+  interior/BankScene.tscn                申海银行
+  interior/HospitalScene.tscn            市立医院
+  interior/LibraryScene.tscn             大学城图书馆
+  interior/RestaurantScene.tscn          中式餐厅
+  interior/PoliceScene.tscn              警察局
+  interior/KTVScene.tscn                 商业街KTV
+  interior/BarScene.tscn                 海风酒吧
+  interior/NightMarketScene.tscn         夏季夜市
+  interior/WangHomeScene.tscn            王德福家
+  interior/LinHomeScene.tscn             小琳家
+  interior/ChenHomeScene.tscn            陈雅家
+  interior/QiangHomeScene.tscn           阿强家
+  interior/ZhaoHomeScene.tscn            赵警官家
 
-Scene 切换:
-  玩家走进门 → trigger检测 → scene.start(targetScene)
-  场景间共享数据通过 Phaser registry 或全局单例
+场景切换机制:
+  ├── 使用 SceneTree.change_scene_to_file() 切换场景
+  ├── 淡入淡出: 用 AnimationPlayer 控制 ColorRect 透明度
+  ├── 场景间共享数据: 通过 Autoload 单例 (Global.gd)
+  ├── 建筑入口: Area2D 检测玩家进入 → 触发切换
+  └── 加载进度: ResourceLoader.load_threaded_request() 异步预加载
 ```
 
 ### 15.4 地图系统
 
 ```
-地图格式: Tiled JSON (.tmj)
+地图格式: Godot TileMapLayer + TileSet
 
-  Tiled 编辑 → 导出 .tmj → Phaser 原生加载
+  城市户外地图 (CityScene):
+    ├── TileSet 资源: 包含所有城市瓦片 (自动瓦片规则)
+    ├── 图层:
+    │     ├── Layer0_地面: 草地/沙滩/道路/人行道
+    │     ├── Layer1_建筑底层: 墙壁/地基/门
+    │     ├── Layer2_建筑上层: 屋顶/屋檐 (部分透明)
+    │     ├── Layer3_装饰: 树木/路灯/长椅/垃圾桶
+    │     └── Layer4_覆盖: 半透明屋顶/阴影 (用于角色走进建筑后)
+    ├── NavigationLayer: NavigationRegion2D 定义 NPC/玩家可行走区域
+    └── 碰撞: TileSet 中标记瓦片碰撞形状
 
-  每张地图包含:
-    ├── Tile Layer × 3-4 (地面/建筑/装饰/覆盖)
-    ├── Object Layer × 2 (碰撞区域/触发区域)
-    └── Tileset 引用 (.png 图集)
+  Godot TileSet 优势:
+    ├── 自动瓦片 (AutoTiling): 定义规则后自动填充道路/河流
+    ├── 地形集 (Terrain Sets): 草地→沙滩→海水过渡自动生成
+    ├── 随机瓦片 (Random Tiles): 同一位置随机选择变体, 避免重复感
+    └── 碰撞/导航: 直接在 TileSet 编辑器中绘制, 无需 Object Layer
 
-  Phaser 加载:
-    this.load.tilemapTiledJSON('city', 'assets/maps/city.json');
-    const map = this.make.tilemap({ key: 'city' });
-    const tileset = map.addTilesetImage('city_tiles', 'tiles');
-    const ground = map.createLayer('ground', tileset);
+  瓦片规格:
+    ├── 瓦片大小: 32×32px
+    ├── 城市地图尺寸: 200×150 瓦片 (6,400×4,800px)
+    └── 室内地图: 10×8 ~ 24×18 瓦片
+
+  代码生成瓦片 (详见第十八章):
+    ├── 草地变体: 代码叠加随机绿色像素, 生成16+变体
+    ├── 建筑墙面: 函数生成砖墙/混凝土/木板纹理
+    ├── 道路: 算法生成沥青+标线+人行道纹理
+    └── 水体: 逐帧生成波浪动画
 ```
 
-### 15.5 UI 覆盖层架构
+### 15.5 UI 系统架构
 
 ```
-HTML 结构:
-  <div id="game-container">
-    <div id="phaser-canvas"></div>          ← Phaser 渲染到这里
-    <div id="ui-overlay">                    ← UI 覆盖层
-      <div id="hud">时间 属性 金钱</div>
-      <div id="dialog-box" class="hidden">...</div>
-      <div id="stock-panel" class="hidden">
-        <canvas id="kline-canvas"></canvas>  ← K线图
-        <div id="trade-controls">买卖按钮</div>
-      </div>
-      <div id="inventory" class="hidden">...</div>
-      <div id="phone" class="hidden">...</div>
-      <div id="menu" class="hidden">...</div>
-    </div>
-  </div>
+Godot Control 节点体系 (替代HTML/CSS):
 
-样式:
-  #phaser-canvas { position: absolute; top: 0; left: 0; z-index: 0; }
-  #ui-overlay { position: absolute; top: 0; left: 0; z-index: 1; }
+  所有UI放在 CanvasLayer 中, 不受游戏相机影响。
+  使用 Godot 内置的 Control 节点树, 通过 Theme 统一风格。
 
-通信:
-  Phaser events → UI 更新:
-    scene.events.emit('open-stock-panel', stockData);
-    document.getElementById('stock-panel').classList.remove('hidden');
+  UI场景树:
+    CanvasLayer (UI)
+    ├── HUD (Control)                           ← 始终显示
+    │   ├── TimeLabel (Label)                   ← "春1月15日 周三 09:35"
+    │   ├── HBoxContainer (状态栏)
+    │   │   ├── HungerBar (TextureProgressBar)  ← 饱食度
+    │   │   ├── EnergyBar (TextureProgressBar)  ← 精力值
+    │   │   ├── StressBar (TextureProgressBar)  ← 压力值
+    │   │   └── MoneyLabel (Label)              ← "¥123,456"
+    │   └── MiniMap (TextureRect)               ← 小地图
+    │
+    ├── DialogBox (Panel)                       ← 对话弹窗 (显示时可见)
+    │   ├── RichTextLabel (NPC对话文本)
+    │   └── VBoxContainer (选项按钮列表)
+    │
+    ├── StockPanel (Panel)                      ← 炒股界面 (侧边栏)
+    │   ├── TabBar: [K线] [分时] [买卖] [持仓]
+    │   ├── KLineCanvas (Control)               ← _draw() 绘制K线
+    │   └── TradeForm (GridContainer)
+    │       ├── CodeInput (LineEdit)
+    │       ├── PriceLabel (Label)
+    │       ├── QtySpinBox (SpinBox)
+    │       └── BuyButton / SellButton (Button)
+    │
+    ├── PhonePanel (Panel)                      ← 手机 (全屏覆盖)
+    │   └── GridContainer (App图标网格)
+    │       ├── StockApp (TextureButton)
+    │       ├── SocialApp (TextureButton)
+    │       ├── CompanyApp (TextureButton)
+    │       └── ...
+    │
+    ├── InventoryPanel (Panel)                  ← 背包
+    │   ├── GridContainer (物品格子)
+    │   └── ItemDetail (VBoxContainer, 选中时显示)
+    │
+    └── PauseMenu (Panel)                       ← 暂停菜单
 
-  UI 操作 → Phaser 反馈:
-    document.getElementById('buy-btn').onclick = () => {
-      scene.events.emit('player-buy', stockCode, quantity);
-    };
+  UI通信 (替代 Phaser event → HTML 模式):
+    ├── 使用 Godot 信号 (Signal):
+    │     player/city_scene.gd:
+    │       signal entered_building(building_id: String)
+    │       → UI监听信号, 打开对应面板
+    │
+    ├── 使用 Autoload 事件总线:
+    │     EventBus.gd (Autoload):
+    │       signal stock_bought(stock_code: String, qty: int)
+    │       → 任意节点可触发和监听
+    │
+    └── UI 操作 → 游戏逻辑:
+          stock_panel/TradeForm/BuyButton.pressed:
+            → EventBus.emit_signal("buy_stock", code, qty)
+            → GameManager.gd 处理交易
+            → UI 通过信号更新显示
 ```
-
----
 
 ### 15.6 场景切换与加载过渡
-
-玩家在户外地图和室内Scene之间切换时，需要有平滑的视觉过渡和加载反馈。
 
 ```
 切换流程:
 
-  走近建筑门 → 按E (或自动触发) →
-    1. 玩家播放"推门"动画 (0.3s)
-    2. ⬛ 画面淡出至黑 (0.5s, Phaser Camera fade)
-    3. 显示加载提示 (如果加载时间>0.5s)
-    4. 卸载当前Scene → 加载目标Scene
-    5. 🌅 画面淡入 (0.5s)
-    6. 玩家出现在室内指定位置 (门口)
+  玩家走近建筑门 → Area2D.body_entered 检测 →
+    1. 播放"开门"动画 (AnimationPlayer, 0.3s)
+    2. ⬛ 画面淡出至黑 (AnimationPlayer 控制 ColorRect, 0.5s)
+    3. ResourceLoader.load_threaded_get() 检查资源是否就绪
+    4. SceneTree.change_scene_to_file("res://scenes/interior/ExchangeScene.tscn")
+    5. 🌅 新场景 ColorRect 淡入 (0.5s)
+    6. 玩家出现在室内指定位置 (Marker2D)
 
-  出门同理:
-    室内门 → 按E →
-    1. 淡出 → 加载 CityScene → 淡入
-    2. 玩家出现在建筑门口
+  实现示例:
+    ```gdscript
+    # city_scene.gd
+    extends Node2D
 
-加载过渡实现:
+    func _on_building_door_body_entered(body: Node2D) -> void:
+        if body.is_in_group("player"):
+            transition_layer.fade_out()
+            await transition_layer.fade_completed
+            SceneTree.change_scene_to_file("res://scenes/interior/exchange.tscn")
 
-  ```typescript
-  // Phaser Scene 切换示例
-  class CityScene extends Phaser.Scene {
-    enterBuilding(buildingId: string) {
-      this.cameras.main.fadeOut(500, 0, 0, 0);
-      this.cameras.main.once('camerafadeoutcomplete', () => {
-        this.game.registry.set('exitPosition', { x: this.player.x, y: this.player.y });
-        this.scene.start(buildingId);
-      });
-    }
-  }
+    # transition_layer.gd
+    extends ColorRect
 
-  class ApartmentScene extends Phaser.Scene {
-    create() {
-      this.cameras.main.fadeIn(500, 0, 0, 0);
-      const spawn = this.findObjectByName('player_spawn');
-      this.player.setPosition(spawn.x, spawn.y);
-    }
-  }
-  ```
+    signal fade_completed
 
-加载状态:
-  ├── 大部分室内Scene很小 (10×10 ~ 20×15 tiles)
-  ├── 预加载后可实现瞬时切换 (<100ms, 不需要loading画面)
-  ├── 首次启动/Load存档时: 显示进度条
-  └── 如果加载>500ms: 显示 "加载中..." + 随机小提示
+    func fade_out(duration: float = 0.5) -> void:
+        var tween = create_tween()
+        tween.tween_property(self, "color:a", 1.0, duration)
+        await tween.finished
+        fade_completed.emit()
 
-相机过渡效果:
-  ├── 淡入淡出: 标准切换方式
-  ├── 圆圈展开: 特殊场景 (梦境/回忆/特殊事件)
-  └── 闪白: 剧情高潮/惊吓事件
+    func fade_in(duration: float = 0.5) -> void:
+        var tween = create_tween()
+        tween.tween_property(self, "color:a", 0.0, duration)
+    ```
 
-Tiled地图触发区域配置:
-  ├── 在TMJ的Object Layer中放置矩形区域
-  ├── 类型: "building_entrance"
-  ├── 属性: { targetScene: "ApartmentScene_L1", spawnX: 4, spawnY: 8 }
-  └── Phaser读取重叠检测 → 玩家走到区域自动触发
+  加载策略:
+    ├── 大部分室内场景即时加载 (<100ms, 直接切换)
+    ├── 城市地图首次加载: ResourceLoader.load_threaded_request()
+    ├── 大资源加载时: 显示进度界面 (ProgressBar)
+    └── 背景预加载: 进入新区域前预加载相邻场景
 
-v1切换性能目标:
-  ├── 室内↔室内切换: <200ms
-  ├── 户外↔室内切换: <500ms
-  └── 首次加载: <3s (含所有资源)
+  相机过渡效果:
+    ├── 淡入淡出: 标准切换方式 (ColorRect 渐变)
+    ├── 圆圈展开: 特殊场景 (AnimationPlayer 控制 ShaderMaterial)
+    └── 闪白: 剧情高潮 (ColorRect 快速闪白)
 ```
 
 ### 15.7 UI设计系统与组件规范
 
-HTML/CSS覆盖层需要统一的设计规范，确保所有界面风格一致。
+Godot 使用 Theme 统一 UI 风格，所有 Control 节点共享同一套主题设置。
 
 ```
-色彩系统:
+颜色系统 (Godot Theme 颜色常量):
   ┌────────────────────────────────────────────┐
-  │ 主色: #2C3E50   深蓝灰  — 背景/标题栏     │
-  │ 辅助: #3498DB   亮蓝    — 按钮/链接       │
-  │ 强调: #E74C3C   红色    — 下跌/警告       │
-  │ 涨色: #27AE60   绿色    — 上涨/成功       │
-  │ 警告: #F39C12   橙色    — 提示/注意       │
-  │ 背景: #ECF0F1   浅灰    — 面板背景       │
-  │ 卡片: #FFFFFF   白色    — 内容卡片       │
-  │ 文字: #2C3E50   深色    — 正文           │
-  │ 文字2: #7F8C8D  灰色   — 辅助文字       │
-  │ 遮罩: rgba(0,0,0,0.5) — 模态背景        │
+  │ primary:    #2C3E50   深蓝灰  — 背景/标题栏 │
+  │ accent:     #3498DB   亮蓝    — 按钮/链接   │
+  │ danger:     #E74C3C   红色    — 下跌/警告   │
+  │ up:         #27AE60   绿色    — 上涨/成功   │
+  │ warning:    #F39C12   橙色    — 提示/注意   │
+  │ bg_light:   #ECF0F1   浅灰    — 面板背景    │
+  │ card:       #FFFFFF   白色    — 内容卡片    │
+  │ text_main:  #2C3E50   深色    — 正文        │
+  │ text_muted: #7F8C8D   灰色    — 辅助文字    │
+  │ overlay:    rgba(0,0,0,0.5)  — 模态背景     │
   └────────────────────────────────────────────┘
 
-字体系统:
+字体系统 (Theme 字体资源):
   ┌────────────────────────────────────────────┐
-  │ 标题: 24px Bold   "Noto Sans SC"          │
+  │ 标题: 24px Bold   "Noto Sans SC" (.ttf)   │
   │ 副标题: 18px Medium "Noto Sans SC"         │
   │ 正文: 14px Regular "Noto Sans SC"          │
   │ 小字: 12px Regular "Noto Sans SC"          │
@@ -6070,62 +6222,61 @@ HTML/CSS覆盖层需要统一的设计规范，确保所有界面风格一致。
   │ 数字: 16px Tabular (股价对齐)              │
   └────────────────────────────────────────────┘
 
-组件规范:
+组件规范 (Theme 样式):
 
-  按钮:
+  按钮 (Button):
     ┌─────────────────────────────────┐
-    │ 主要: bg=#3498DB, white text, padding=12px 24px, radius=6px    │
-    │ 次要: bg=white, border=#3498DB, text=#3498DB                  │
-    │ 危险: bg=#E74C3C, white text                                  │
-    │ 禁用: opacity=0.5                                              │
-    │ hover: brightness=1.1  /  active: scale=0.97                   │
+    │ 普通: bg=#3498DB, white text, 圆角4px       │
+    │ 次要: bg=white, border=#3498DB, text=#3498DB │
+    │ 危险: bg=#E74C3C, white text                  │
+    │ 禁用: modulate.a=0.5                           │
+    │ hover: modulate *= 1.1  /  pressed: scale=0.97 │
     └─────────────────────────────────┘
 
-  输入框:
+  输入框 (LineEdit / SpinBox):
     ┌─────────────────────────────────┐
-    │ 默认: border=#BDC3C7, bg=white, padding=8px 12px              │
-    │ 聚焦: border=#3498DB, box-shadow blue glow                    │
-    │ 错误: border=#E74C3C                                          │
+    │ 默认: border=#BDC3C7, bg=white, 内边距4px     │
+    │ 聚焦: border=#3498DB                           │
+    │ 错误: border=#E74C3C                           │
     └─────────────────────────────────┘
 
-  卡片/面板:
+  面板 (Panel):
     ┌─────────────────────────────────┐
-    │ bg=#FFFFFF, radius=8px, shadow soft, padding=16px              │
+    │ bg=#FFFFFF, 圆角4px, drop_shadow, padding=16px  │
     └─────────────────────────────────┘
 
-  对话框/模态:
+  对话框 (AcceptDialog / 自定义):
     ┌─────────────────────────────────┐
-    │ 背景遮罩: rgba(0,0,0,0.5) + blur(2px)                         │
-    │ 对话框: max-width 480px, 居中, radius=12px                     │
-    │ 入场动画: fadeIn 200ms + scale 1.05→1.0                        │
+    │ 背景遮罩: Color(0,0,0,0.5), mouse_filter=pass  │
+    │ 对话框: 居中, 圆角8px, Entrance: scale+move     │
     └─────────────────────────────────┘
 
-  通知/Toast:
+  通知/Toast (自定义Panel):
     ┌─────────────────────────────────┐
-    │ 位置: 屏幕顶部居中                                              │
-    │ 动画: slideDown 300ms + fadeOut 300ms                           │
-    │ 自动消失: 3s (info/success) / 5s (warning/error)                │
+    │ 位置: 屏幕顶部居中                                    │
+    │ 动画: Tween (modulate.a 0→1 + position.y 偏移)         │
+    │ 自动消失: 3s (info) / 5s (warning/error)               │
     └─────────────────────────────────┘
 
-动画规范:
-  ├── 入场: fadeIn 200ms + translateY(10px→0)
-  ├── 出场: fadeOut 150ms
-  ├── 切换: slideLeft/Right 250ms (手机App页面)
-  └── 加载: spin 1s infinite linear
+动画规范 (Tween / AnimationPlayer):
+  ├── 入场: modulate.a 0→1, position offset (0.2s)
+  ├── 出场: modulate.a 1→0 (0.15s)
+  ├── 切换: 左右滑动 (手机App页面, 0.25s)
+  └── 加载: 旋转动画 (AnimatedSprite2D, 无限循环)
 
 布局规范:
-  ├── 最小分辨率: 1280×720 (锁定比例)
-  ├── HUD: 屏幕顶部固定栏, 高度48px
-  ├── 侧边栏: 宽度320px, 从右侧滑入
-  ├── 全屏覆盖: 手机/暂停菜单/对话框
-  └── z-index层级:
-        ├── 1000: Phaser Canvas (游戏世界)
-        ├── 1100: HUD (时间/属性/金钱)
-        ├── 1200: 对话框/Toast
-        ├── 1300: 侧边栏 (股票/背包)
-        ├── 1400: 手机全屏
-        ├── 1500: 暂停菜单
-        └── 1600: 模态提示 (保存/确认)
+  ├── 最小分辨率: 1280×720
+  ├── HUD: 屏幕顶部, 高度48px (CanvasLayer)
+  ├── 侧边栏: 宽度320px, 从右侧滑入 (Tween 控制 position)
+  ├── 全屏覆盖: 手机/暂停菜单/对话框 (覆盖全 CanvasLayer)
+  └── 层次 (CanvasLayer 排序):
+        ├── Layer 1: 游戏世界 (Node2D)
+        ├── Layer 2: HUD (时间/属性/金钱, CanvasLayer)
+        ├── Layer 3: 对话框/Toast (CanvasLayer)
+        ├── Layer 4: 侧边栏 (股票/背包, CanvasLayer)
+        ├── Layer 5: 手机全屏 (CanvasLayer)
+        ├── Layer 6: 暂停菜单 (CanvasLayer)
+        └── Layer 7: 模态提示 (CanvasLayer, 覆盖所有)
 ```
 
 ---
@@ -6138,15 +6289,12 @@ HTML/CSS覆盖层需要统一的设计规范，确保所有界面风格一致。
 
 ```
 游戏启动流程:
-  ├── 1. 游戏窗口初始化 (黑屏, <1s)
-  ├── 2. 显示启动Logo
-  │     ├── Phaser 标志 (0.5s)
-  │     └── 开发团队Logo (0.5s)
-  ├── 3. 加载核心资源
-  │     ├── 进度条从 0% → 100%
-  │     ├── 显示正在加载的资源名称
+  ├── 1. 引擎初始化 (内置进度条)
+  ├── 2. BootScene.tscn 加载
+  │     ├── 显示游戏Logo + 进度条
+  │     ├── ResourceLoader.load_threaded_request() 并发加载核心资源
   │     └── 底部显示随机小提示 (Tips)
-  └── 4. 加载完成 → 自动跳转到 TitleScene
+  └── 3. 加载完成 → change_scene_to_file("TitleScene.tscn")
 
 加载画面布局:
   ┌──────────────────────────────────────────┐
@@ -6165,35 +6313,28 @@ HTML/CSS覆盖层需要统一的设计规范，确保所有界面风格一致。
   └──────────────────────────────────────────┘
 
 进度条实现:
-  ├── Phaser Scene 内用 Graphics 绘制
-  ├── 加载进度通过 this.load.progress 监听
-  ├── 预加载清单: BootScene 中定义
-  └── 最小显示时间: 0.8s (避免闪烁)
+  ├── 场景中的 TextureProgressBar 节点
+  ├── ResourceLoader.load_threaded_get_status() 轮询进度
+  ├── 最小显示时间: 0.8s (Tween 控制)
+  └── 加载完成: animate out → 切换场景
 ```
 
 #### 15.8.2 场景切换加载画面
 
 ```
-场景切换时 (如: 户外→室内), 使用半透明覆盖层:
+场景切换时使用 ColorRect 覆盖层实现过渡:
 
 过渡方式A: 淡入淡出 (推荐, <500ms)
-  ├── 1. 按 Esc/交互 → 触发切换
-  ├── 2. Phaser Camera 淡出 (0.2s) → 黑屏
-  ├── 3. 黑屏期间切换场景 (<100ms)
-  ├── 4. Camera 淡入 (0.2s) → 新场景
-  └── 总耗时: ~0.5s, 无额外UI
+  ├── 1. Area2D.body_entered 触发切换
+  ├── 2. ColorRect Tween: modulate.a 0→1 (0.2s) → 黑屏
+  ├── 3. 黑屏期间 change_scene_to_file() (<100ms)
+  ├── 4. ColorRect Tween: modulate.a 1→0 (0.2s) → 新场景
+  └── 总耗时: ~0.5s, 无需额外UI
 
-过渡方式B: 加载覆盖层 (加载>500ms时启用)
-  ├── 在 HTML overlay 层显示加载UI
-  ├── 覆盖层内容:
-  │     ┌──────────────────────────────┐
-  │     │                              │
-  │     │       ⏳ 加载中...            │
-  │     │    ████████░░░░░ 60%         │
-  │     │                              │
-  │     └──────────────────────────────┘
-  ├── 使用 CSS 动画: spin 图标 + 渐入
-  └── 加载完成 → 覆盖层渐出消失 (0.15s)
+过渡方式B: 加载界面 (加载>500ms时启用)
+  ├── CanvasLayer 显示加载UI
+  ├── 包含: ProgressBar + 旋转动画 + 场景名
+  └── 加载完成 → CanvasLayer 渐出消失 (0.15s)
 ```
 
 #### 15.8.3 加载提示文案池 (Tips)
@@ -6223,44 +6364,57 @@ HTML/CSS覆盖层需要统一的设计规范，确保所有界面风格一致。
   └── "财务造假一时爽, 审计上门火葬场"
 
 🎮 操作:
-  ├── "按 M 键打开地图, 快速查看城市布局"
-  ├── "双击 NPC 可以自动寻路走过去"
-  ├── "手机上可以查看邮件和社交动态"
-  ├── "成就系统记录你的每一个里程碑"
-  └── "遇到困难? 试试给NPC发 WWSSADADBABA"
+  ├── "按 W/A/S/D 移动角色"
+  ├── "走近 NPC 按 E 键对话"
+  ├── "按 M 键打开手机, 查看资产和社交"
+  ├── "按 Tab/I 打开背包"
+  └── "按 Esc 暂停游戏"
 ```
 
 #### 15.8.4 资源预加载策略
 
 ```
-预加载分层策略, 按需加载避免卡顿:
+预加载分层策略:
 
 Layer 1 — 核心资源 (启动时加载):
-  ├── UI素材: 所有HTML/CSS/字体/图标
+  ├── UI主题资源: Theme.tres + 所有字体
   ├── 角色精灵: 玩家角色 (4方向 × 4帧)
-  ├── 城市地图: CityScene的Tiled JSON + 瓦片集
+  ├── 城市地图 TileSet + 核心瓦片纹理
   └── 音频: 主菜单BGM + UI音效
 
 Layer 2 — 按需加载 (进入场景时):
-  ├── 室内场景: 对应建筑的Tiled JSON + 瓦片集
-  ├── NPC精灵: 当前场景内NPC
-  └── 音频: 该场景BGM
+  ├── 室内场景: 对应 .tscn 文件 (Godot 自动管理)
+  ├── NPC精灵: 当前场景内NPC (AnimatedSprite2D 纹理)
+  └── 音频: 该场景BGM (AudioStreamMP3)
 
 Layer 3 — 延迟加载 (游戏过程中):
-  ├── 非当前场景资源: 后台线程预加载
-  ├── 钓鱼小游戏: 使用时首次加载
+  ├── 非当前场景: ResourceLoader.load_threaded_request() 预加载
+  ├── 钓鱼小游戏: 首次使用时加载
   └── 其他迷你游戏: 使用时首次加载
 
-加载管理器伪代码:
-  class LoadManager {
-    private loaded: Set<string>;
-    private loading: Map<string, Promise<void>>;
+代码实现:
+  ```gdscript
+  # preload_manager.gd (Autoload)
+  extends Node
 
-    async loadLayer1(): Promise<void>;
-    async loadSceneAssets(sceneId: string): Promise<void>;
-    preloadAdjacent(scenes: string[]): void;  // 预加载相邻场景
-    getProgress(): number;  // 0.0 ~ 1.0
-  }
+  var loaded_resources: Dictionary = {}
+
+  func preload_scene(scene_path: String) -> void:
+      ResourceLoader.load_threaded_request(scene_path)
+
+  func get_scene(scene_path: String) -> PackedScene:
+      if not loaded_resources.has(scene_path):
+          loaded_resources[scene_path] = ResourceLoader.load(scene_path)
+      return loaded_resources[scene_path]
+
+  func get_progress() -> float:
+      # 返回全局加载进度
+      var total = 0.0
+      for path in _loading_queue:
+          var status = ResourceLoader.load_threaded_get_status(path)
+          total += status[1]  # progress
+      return total / _loading_queue.size()
+  ```
 ```
 
 ---
@@ -6271,15 +6425,16 @@ Layer 3 — 延迟加载 (游戏过程中):
 
 ```
 音效系统职责:
-  ├── BGM管理: 场景切换时自动切换背景音乐
-  ├── 音效触发: 玩家操作/事件触发对应音效
+  ├── BGM管理: 场景切换时自动切换背景音乐 (AudioStreamPlayer)
+  ├── 音效触发: 玩家操作/事件触发对应音效 (AudioStreamPlayer2D)
   └── 音量控制: 独立控制BGM/音效/语音音量
 
 实现方式:
-  ├── 使用 Phaser 3 内置 SoundManager
-  ├── 音频格式: .ogg (首选, 包体小) + .mp3 (降级)
-  ├── 音效池: 预加载常用音效, 避免卡顿
-  └── BGM无缝循环: 使用loop模式
+  ├── Godot 内置 AudioStreamPlayer 节点
+  ├── 音频格式: .ogg (首选, 包体小) + .mp3 (备用)
+  ├── 音效池: 多个 AudioStreamPlayer 实例, 轮询播放避免卡顿
+  ├── BGM无缝循环: AudioStreamPlayer 的 autoplay + loop 模式
+  └── 3D音效定位: AudioStreamPlayer2D 用于环境音 (脚步声因地面类型变调)
 ```
 
 ### 16.2 BGM清单
@@ -6299,11 +6454,10 @@ Layer 3 — 延迟加载 (游戏过程中):
   └── 🌧️ 雨天: "雨声BGM" (钢琴+白噪音雨声)
 
 BGM切换规则:
-  走进建筑 → 渐出城市BGM (1秒) → 渐入室内BGM (1秒)
-  走出建筑 → 反向切换
-  时间变化 → 城市BGM自动过渡 (白天→黄昏→夜晚)
-  天气变化 → 叠加天气环境音
-```
+  ├── Godot 场景切换时, AudioManager Autoload 自动切换BGM
+  ├── 渐变切换: Tween 控制 AudioStreamPlayer.volume_db 渐出/渐入
+  ├── 时间变化 → 城市BGM自动过渡 (白天→黄昏→夜晚)
+  └── 天气变化 → 叠加天气环境音 (AudioStreamPlayer2D)
 
 ### 16.3 音效SFX清单
 
@@ -6336,14 +6490,14 @@ BGM切换规则:
   └── 🌧️ 雨声: ambient_rain.ogg (循环, 雨天覆盖)
 
 音效触发机制:
-  Phaser 内置事件:
-    scene.events.on('step', playerPos => playFootstep(playerPos));
-    scene.events.on('buy-stock', () => playSound('trade'));
-    scene.events.on('open-door', () => playSound('door_open'));
+  Godot 信号:
+    Player.walk_step signal → AudioManager.play_footstep(ground_type)
+    TradeSystem.stock_bought signal → AudioManager.play_sfx('trade')
+    Player.entered_door signal → AudioManager.play_sfx('door_open')
 
-  UI层事件 (自定义EventEmitter):
-    uiEvents.on('click', () => playSound('click'));
-    uiEvents.on('earn-money', amount => playSound('coin'));
+  UI 交互音效:
+    Button.pressed → AudioManager.play_sfx('click')
+    GameManager.money_changed signal → AudioManager.play_sfx('coin')
 ```
 
 ### 16.4 音频资源规格
@@ -6369,228 +6523,341 @@ BGM切换规则:
 
 ---
 
-## 十七、项目目录结构
+## 十七、项目目录结构 (Godot 4)
 
 ```
 shen-hai-piao/
-├── src/
-│   ├── main.ts                    # 入口 (Phaser 初始化 + UI 挂载)
-│   │
-│   ├── game/                      # 核心逻辑 (纯 TS, 不依赖 Phaser)
-│   │   ├── time.ts                # 时间系统
-│   │   ├── stats.ts               # 属性系统
-│   │   ├── player.ts              # 玩家状态
-│   │   ├── audio.ts               # 音频管理 (BGM/SFX调度)
-│   │   ├── stock/                 # 股市引擎
-│   │   │   ├── market.ts          # 市场主控
-│   │   │   ├── portfolio.ts       # 持仓管理
-│   │   │   ├── trade.ts           # 交易执行
-│   │   │   ├── seed.ts            # 确定性随机
-│   │   │   ├── government.ts      # 政府AI
-│   │   │   ├── companies.ts       # 30家公司
-│   │   │   ├── quants.ts          # 5家量化
-│   │   │   ├── retail.ts          # 100散户
-│   │   │   └── price.ts           # 5因子定价
-│   │   ├── company/               # 公司系统 (细分模块)
-│   │   │   ├── index.ts           # 玩家公司主控
-│   │   │   ├── revenue.ts         # 收入计算+成本
-│   │   │   ├── management.ts      # 五大管理属性
-│   │   │   ├── employees.ts       # 员工系统
-│   │   │   ├── ipo.ts             # IPO流程引擎
-│   │   │   ├── financing.ts       # 融资系统
-│   │   │   ├── branch.ts          # 分公司/子公司
-│   │   │   ├── merger.ts          # 并购/收购
-│   │   │   ├── board.ts           # 董事会/股东大会
-│   │   │   ├── fraud.ts           # 财务造假/审计
-│   │   │   └── crime.ts           # 挪用公款/商业犯罪
-│   │   ├── job.ts                 # 打工系统
-│   │   ├── fishing.ts             # 钓鱼系统
-│   │   ├── achievements.ts        # 成就系统
-│   │   ├── events.ts              # 事件系统
-│   │   └── guide.ts               # 新手引导
-│   │
-│   ├── scenes/                    # Phaser 场景
-│   │   ├── BootScene.ts           # 启动加载 (资源预加载)
-│   │   ├── TitleScene.ts          # 主菜单/标题画面
-│   │   ├── CharacterCreateScene.ts # 角色创建
-│   │   ├── CityScene.ts           # 申海市主地图
-│   │   ├── ApartmentScene_L1.ts   # 公寓层1 (出租屋)
-│   │   ├── ApartmentScene_L2.ts   # 公寓层2 (精装公寓)
-│   │   ├── ApartmentScene_L3.ts   # 公寓层3 (海景别墅)
-│   │   ├── ExchangeScene.ts       # 证券交易所
-│   │   ├── StoreScene.ts          # 便利店
-│   │   ├── OfficeScene.ts         # 公司办公室
-│   │   ├── CafeScene.ts           # 海风咖啡馆
-│   │   ├── BankScene.ts           # 申海银行
-│   │   ├── HospitalScene.ts       # 市立医院
-│   │   ├── LibraryScene.ts        # 大学城图书馆
-│   │   ├── RestaurantScene.ts     # 中式餐厅
-│   │   ├── PoliceScene.ts         # 警察局
-│   │   ├── KTVScene.ts            # 商业街KTV
-│   │   ├── BarScene.ts            # 海风酒吧
-│   │   └── NightMarketScene.ts    # 夏季夜市
-│   │
-│   ├── entities/                  # Phaser 实体
-│   │   ├── Player.ts              # 玩家精灵+控制器
-│   │   ├── NPC.ts                 # NPC 精灵+AI日程
-│   │   └── NPCData.ts             # NPC 数据 (20+人)
-│   │
-│   ├── ui/                        # HTML/CSS/TS UI层
-│   │   ├── hud.ts                 # HUD (时间/属性/金钱)
-│   │   ├── dialog.ts              # NPC对话弹窗
-│   │   ├── stock/                 # 炒股界面
-│   │   │   ├── panel.ts           # 交易面板
-│   │   │   ├── kline.ts           # K线 (Canvas2D)
-│   │   │   ├── timeseries.ts      # 分时走势
-│   │   │   └── indicators.ts      # 技术指标
-│   │   ├── company/               # 公司管理界面
-│   │   │   ├── dashboard.ts       # 公司总览
-│   │   │   ├── employees.ts       # 员工管理
-│   │   │   ├── ipo.ts             # IPO流程界面
-│   │   │   └── financing.ts       # 融资面板
-│   │   ├── inventory.ts           # 背包
-│   │   ├── phone.ts               # 手机界面
-│   │   ├── phone/                 # 手机App子页面
-│   │   │   ├── stock-app.ts       # 炒股App
-│   │   │   ├── company-app.ts     # 公司App
-│   │   │   ├── social-app.ts      # 社交App
-│   │   │   └── assets-app.ts      # 资产App
-│   │   ├── fishing.ts             # 钓鱼小游戏UI
-│   │   ├── achievements.ts        # 成就界面
-│   │   ├── minimap.ts             # 小地图
-│   │   ├── menu.ts                # 暂停/设置
-│   │   └── guide.ts               # 新手引导覆盖层
-│   │
-│   ├── data/                      # 静态数据
-│   │   ├── stocks.ts              # 30股票定义
-│   │   ├── npcs.ts                # NPC定义+日程
-│   │   ├── buildings.ts           # 建筑数据
-│   │   ├── items.ts               # 物品道具
-│   │   ├── fish.ts                # 鱼种数据
-│   │   └── achievements.ts        # 成就定义列表
-│   │
-│   ├── save/                      # 存档 (Electron fs)
-│   │   ├── index.ts               # 存档管理器
-│   │   └── schemas.ts             # 数据表定义
-│   │
-│   └── types/
-│       ├── game.ts                # 核心类型
-│       ├── stock.ts               # 股市类型
-│       ├── entity.ts              # NPC/角色类型
-│       ├── company.ts             # 公司系统类型
-│       ├── item.ts                # 物品系统类型
-│       ├── save.ts                # 存档结构类型
-│       └── event.ts               # 事件系统类型
+├── project.godot                     # Godot 项目配置 (含 input map)
+├── icon.svg                          # 应用图标
 │
-├── static/
-│   ├── index.html
-│   └── assets/
-│       ├── maps/                  # Tiled JSON (.tmj)
-│       ├── tilesets/              # 瓦片图集 PNG
-│       ├── sprites/               # 角色精灵图
-│       ├── audio/                 # BGM/SFX音频文件
-│       └── ui/                    # UI图标
+├── assets/                           # 素材资源 (非代码生成部分)
+│   ├── audio/                        # 音频文件
+│   │   ├── bgm/                      # BGM (11首 MP3/Ogg)
+│   │   │   ├── menu.ogg              # 主菜单
+│   │   │   ├── city_day.ogg          # 城市白天
+│   │   │   ├── city_night.ogg        # 城市夜晚
+│   │   │   └── ...
+│   │   ├── sfx/                      # 音效 (20+ WAV/Ogg)
+│   │   │   ├── click.ogg
+│   │   │   ├── coin.ogg
+│   │   │   ├── door_open.ogg
+│   │   │   └── ...
+│   │   └── ambient/                  # 环境音
+│   │       ├── rain.ogg
+│   │       └── waves.ogg
+│   │
+│   ├── fonts/                        # 字体
+│   │   └── NotoSansSC.ttf
+│   │
+│   ├── ui/                           # UI 图标/纹理 (代码生成可替换)
+│   │   ├── icons/                    # 手机App图标
+│   │   └── theme/                    # Theme.tres 主题资源
+│   │
+│   └── tilesets/                     # 瓦片纹理 (部分代码生成)
+│       ├── city_tiles.png            # 城市瓦片 (代码后处理染色)
+│       ├── indoor_tiles.png          # 室内瓦片
+│       └── nature_tiles.png          # 自然瓦片 (代码生成变体)
 │
-├── electron/
-│   ├── main.ts                    # 主进程
-│   ├── preload.ts                 # 预加载
-│   └── database.ts                # SQLite 初始化
+├── src/                              # 源代码
+│   ├── autoload/                     # 全局单例 (Godot Autoload)
+│   │   ├── global.gd                 # 全局状态 (玩家属性/金钱/存档)
+│   │   ├── event_bus.gd              # 事件总线 (Signal 集中管理)
+│   │   ├── audio_manager.gd          # 音频管理 (BGM/SFX调度)
+│   │   ├── save_manager.gd           # 存档管理 (JSON读写)
+│   │   ├── time_system.gd            # 时间系统 (日/时/分/季节)
+│   │   └── asset_generator.gd        # 素材代码生成器 (核心!)
+│   │
+│   ├── systems/                      # 核心玩法系统 (纯逻辑)
+│   │   ├── stock/                    # 股市引擎
+│   │   │   ├── market.gd            # 市场主控
+│   │   │   ├── portfolio.gd         # 持仓管理
+│   │   │   ├── trade.gd             # 交易执行
+│   │   │   ├── government.gd        # 政府AI
+│   │   │   ├── companies.gd         # 30家公司数据
+│   │   │   ├── quants.gd            # 5家量化机构
+│   │   │   ├── retail.gd            # 100散户AI
+│   │   │   └── price.gd             # 5因子定价模型
+│   │   │
+│   │   ├── company/                  # 公司系统
+│   │   │   ├── company_manager.gd   # 公司主控
+│   │   │   ├── revenue.gd           # 收入计算
+│   │   │   ├── employees.gd         # 员工系统
+│   │   │   ├── ipo.gd               # IPO流程
+│   │   │   ├── management.gd        # 五大管理属性
+│   │   │   ├── financing.gd         # 融资
+│   │   │   ├── merger.gd            # 并购
+│   │   │   ├── board.gd             # 董事会
+│   │   │   └── fraud.gd             # 财务造假
+│   │   │
+│   │   ├── player.gd                # 玩家状态管理
+│   │   ├── stats.gd                 # 属性/技能系统
+│   │   ├── inventory.gd             # 背包系统
+│   │   ├── crafting.gd              # 烹饪系统
+│   │   ├── fishing.gd               # 钓鱼系统
+│   │   ├── quests.gd                # 任务系统
+│   │   ├── events.gd                # 事件引擎
+│   │   ├── achievements.gd          # 成就系统
+│   │   ├── npc_scheduler.gd         # NPC日程调度引擎
+│   │   └── weather.gd               # 天气系统
+│   │
+│   ├── procedural_assets/            # 素材代码生成系统 (详见十八章)
+│   │   ├── sprite_generator.gd      # 通用精灵生成器
+│   │   ├── tile_generator.gd        # 瓦片纹理生成
+│   │   ├── building_generator.gd    # 建筑外观生成
+│   │   ├── character_generator.gd   # 角色/NPC像素生成
+│   │   ├── furniture_generator.gd   # 家具像素生成
+│   │   ├── ui_icon_generator.gd     # UI图标生成
+│   │   ├── palette.gd               # DB32调色板数据
+│   │   └── effects.gd               # 特效像素 (粒子/火花)
+│   │
+│   └── data/                         # 静态数据 (JSON/Resource)
+│       ├── stocks.tres              # 30只股票定义
+│       ├── npcs.tres                # 20+ NPC定义+日程
+│       ├── buildings.tres           # 建筑数据
+│       ├── items.tres               # 物品/道具
+│       ├── fish.tres                # 鱼种数据
+│       ├── quests.tres              # 任务定义
+│       ├── dialogue/                # NPC对话数据
+│       │   ├── wang_ayi.json
+│       │   ├── a_qiang.json
+│       │   └── ...
+│       └── achievements.tres        # 成就定义
 │
-├── tools/
-│   └── map-editor.ts              # 地图辅助
+├── scenes/                           # Godot 场景文件 (.tscn)
+│   ├── boot/                         # 启动加载
+│   │   └── BootScene.tscn
+│   ├── title/                        # 主菜单
+│   │   └── TitleScene.tscn
+│   ├── character/                    # 角色创建
+│   │   └── CharacterCreateScene.tscn
+│   ├── city/                         # 城市主地图
+│   │   ├── CityScene.tscn
+│   │   └── city_map/                 # 地图相关资源
+│   │       ├── city_tileset.tres
+│   │       └── navigation_region.tscn
+│   ├── interior/                     # 室内场景 (20个)
+│   │   ├── Apartment_L1.tscn
+│   │   ├── Apartment_L2.tscn
+│   │   ├── Apartment_L3.tscn
+│   │   ├── ExchangeScene.tscn
+│   │   ├── StoreScene.tscn
+│   │   ├── OfficeScene.tscn
+│   │   ├── CafeScene.tscn
+│   │   ├── BankScene.tscn
+│   │   ├── HospitalScene.tscn
+│   │   ├── LibraryScene.tscn
+│   │   ├── RestaurantScene.tscn
+│   │   ├── PoliceScene.tscn
+│   │   ├── KTVScene.tscn
+│   │   ├── BarScene.tscn
+│   │   ├── NightMarketScene.tscn
+│   │   ├── WangHomeScene.tscn
+│   │   ├── LinHomeScene.tscn
+│   │   ├── ChenHomeScene.tscn
+│   │   ├── QiangHomeScene.tscn
+│   │   └── ZhaoHomeScene.tscn
+│   │
+│   └── ui/                           # UI 场景片段
+│       ├── hud.tscn                  # HUD (嵌入主场景)
+│       ├── dialog_box.tscn           # 对话框
+│       ├── stock_panel.tscn          # 炒股面板
+│       ├── inventory_panel.tscn      # 背包
+│       ├── phone_panel.tscn          # 手机
+│       └── pause_menu.tscn           # 暂停菜单
 │
-├── vite.config.ts
-├── tsconfig.json
-├── package.json
-└── README.md
+├── scripts/                          # 节点挂载脚本
+│   ├── player/                       # 玩家控制器
+│   │   ├── player.gd
+│   │   └── player_animation.gd
+│   ├── npc/                          # NPC 控制器
+│   │   ├── npc_base.gd              # NPC基类
+│   │   ├── npc_pathfinding.gd       # 寻路组件
+│   │   └── npc_dialogue.gd          # 对话组件
+│   ├── props/                        # 可交互物体
+│   │   ├── door.gd
+│   │   ├── shop_counter.gd
+│   │   └── fishing_spot.gd
+│   └── ui/                           # UI 逻辑
+│       ├── hud.gd
+│       ├── dialog_box.gd
+│       ├── stock_panel/
+│       │   ├── stock_panel.gd
+│       │   ├── kline_draw.gd        # K线绘图 (CanvasItem._draw)
+│       │   └── order_form.gd
+│       ├── inventory_panel.gd
+│       └── phone.gd
+│
+├── addons/                           # Godot 插件
+│   └── procedural_assets/            # 素材生成插件 (编辑器内预览)
+│
+├── exports/                          # 导出配置
+│   ├── web.html                      # Web 导出模板
+│   └── desktop/                      # 桌面导出配置
+│
+└── tests/                            # 单元测试
+    ├── test_stock_market.gd
+    ├── test_company.gd
+    └── test_npc_schedule.gd
 ```
 
 ---
 
-## 十八、开发路线图
+## 十八、开发路线图 (Godot 4)
 
-### Phase 1 — 核心框架（6周）
+### Phase 0 — 项目脚手架（1周）
 
 ```
-Week 1-2: 地图 + 角色
-  ├── Vite + TS + Phaser 3 初始化
-  ├── Tiled 瓦片地图加载 (TMJ格式)
-  ├── 玩家控制器 (WASD + 碰撞检测)
-  ├── 相机跟随
-  └── 地图切换 (户外↔室内)
+Week 0: Godot 项目初始化
+  ├── Godot 4 项目创建 + GDScript 严格模式配置
+  ├── GitHub 仓库初始化 (.gitignore + Godot 专用忽略)
+  ├── 项目结构搭建 (scenes/scripts/autoload/assets)
+  ├── 输入映射配置 (Input Map: WASD/UI/交互键)
+  ├── 渲染配置 (2D Forward+ / 窗口尺寸1280×720 / stretch mode)
+  ├── DB32 调色板数据脚本 (palette.gd)
+  ├── AssetGenerator 骨架 + 编辑器插件注册
+  └── Web / Windows 导出模板配置
+```
 
-Week 3-4: 股市引擎 (沿用之前的市场模拟)
-  ├── 30只股票 + 基本面模型
+### Phase 1 — 核心框架 + 素材管线（8周）
+
+```
+Week 1-2: 素材代码生成管线 (核心!)
+  ├── palette.gd: DB32 色板常量 + 调色板工具函数
+  ├── tile_generator.gd: 地面/道路/水域/草地瓦片像素生成
+  ├── building_generator.gd: 建筑外观生成 (墙面/窗户/屋顶)
+  ├── character_generator.gd: 角色像素生成 (行走图4方向)
+  ├── furniture_generator.gd: 室内家具生成
+  ├── ui_icon_generator.gd: UI图标/按钮纹理生成
+  ├── sprite_generator.gd: 通用精灵合成器 (分层叠加)
+  ├── effects.gd: 特效像素 (雨水/火花/粒子纹理)
+  └── 所有生成器在编辑器插件中可预览
+
+Week 3-4: 地图系统 + 玩家控制
+  ├── TileMapLayer + TileSet 配置 (自动瓦片/地形集)
+  ├── 代码生成瓦片导入 TileSet (tile_generator → TileSet)
+  ├── 玩家控制器 (CharacterBody2D + 碰撞层)
+  ├── 像素行走动画 (AnimationPlayer 逐帧切换)
+  ├── 相机跟随 (Camera2D + smoothing)
+  ├── Y-Sort 排序 (建筑/角色/装饰品的渲染顺序)
+  ├── NavigationRegion2D + NavigationAgent2D 寻路网格
+  ├── 地图切换 (场景过渡: 户外↔室内)
+  └── 网格对齐/半格移动优化
+
+Week 5-6: 股市引擎 + UI框架
+  ├── 30只股票 + 基本面模型 (纯GDScript)
   ├── 政府/量化/散户AI
   ├── 5因子定价公式
-  └── K线数据生成
+  ├── K线数据生成 + 存储
+  ├── CanvasLayer UI 根节点
+  ├── HUD 布局 (时间/金钱/属性面板) - Control节点
+  ├── 手机系统框架 (App网格 + 触摸交互)
+  ├── K线绘图 (Control._draw() 自定义绘制)
+  └── 分时图/深度图绘制
 
-Week 5-6: 交互系统
-  ├── NPC 对话系统 (对话框UI)
-  ├── 触发点 (进门/交互)
-  ├── HTML/CSS HUD (时间/属性/金钱)
-  ├── 手机系统框架 (App网格+基础交互)
-  └── 基础存档
+Week 7-8: 交互系统 + 存档
+  ├── NPC 对话系统 (DialogBox Control节点)
+  ├── 触发点机制 (Area2D + 交互提示)
+  ├── NPC 日程调度引擎 (npc_scheduler.gd)
+  ├── 事件总线 (EventBus 单例 + 自定义信号)
+  ├── 时间系统 (TimeSystem Autoload)
+  ├── AudioManager (BGM/SFX 调度 + 渐入渐出)
+  ├── 存档系统 (JSON序列化 + FileAccess)
+  └── 设置面板 (音量/画质/键位)
 ```
 
-### Phase 2 — 内容填充（5周）
+### Phase 2 — 内容填充（8周）
 
 ```
-Week 7-8: 地图+建筑
-  ├── 申海市总图 (户外地图)
-  ├── 公寓室内 (自己的家)
-  ├── 证券交易所室内 (大户室场景)
-  ├── 便利店/商业街
+Week 9-10: 地图 + 室内场景
+  ├── 申海市完整城市地图 (TileMap + Navigation)
+  ├── 海岸线/港口/灯塔/沙滩区域
+  ├── 玩家公寓 (Apartment_L1 + 家具布局)
+  ├── 证券交易所室内 (大户室+交易大厅)
+  ├── 便利店/餐馆/咖啡厅室内
   ├── 公司办公室/银行室内
-  └── 地图装饰 (树/路灯/长椅)
+  ├── NPC 住宅 x5 (王阿姨/阿强/小琳/老陈/赵叔)
+  ├── KTV/酒吧/夜市室内
+  ├── 图书馆/医院/警察局室内
+  └── 场景过渡动画 (Fade/开门)
 
-Week 9-10: 玩法系统
-  ├── 股市交易界面 (HTML Canvas K线 + TS 按钮)
-  ├── 打工系统 (走到地点→干活)
-  ├── 公司系统 (注册/管理/五大属性/员工/融资)
-  ├── NPC 日程 (在地图上行走)
-  ├── 睡觉/吃饭/健身
-  └── 背包/物品/便利店购物
+Week 11-12: 玩法系统 (上)
+  ├── 炒股交易界面 (下单/持仓/撤单/历史)
+  ├── 三账户体系 (个人/证券/公司)
+  ├── 公司系统 (注册/管理/五大属性/员工)
+  ├── 公司IPO/融资/并购/董事会
+  ├── 财务造假系统 (欺诈+审计+风险)
+  ├── 打工系统 (走到地点→小游戏→报酬)
+  └── 背包/物品/道具系统
 
-Week 11: 辅助系统
+Week 13-14: 玩法系统 (下)
+  ├── 烹饪系统 (菜谱/材料/厨具)
   ├── 钓鱼系统 (抛竿+拉锯小游戏)
-  ├── 事件系统 (每日/随机/周期)
-  ├── 成就系统 (10类+奖励)
-  ├── 手机炒股App/公司App
-  └── 小地图
+  ├── NPC 好感度 (对话/送礼/事件)
+  ├── 恋爱系统 (心动值/约会/特殊事件)
+  ├── 55个心动事件 (剧情演出)
+  ├── 时间系统细化 (季节/节日/生日)
+  ├── 房屋升级 (家具购买+布局编辑)
+  └── 成就系统 (10类+奖励)
+
+Week 15-16: 事件 + 剧情
+  ├── 每日随机事件 (新闻/天气/突发)
+  ├── 周期事件 (周末夜市/节日活动)
+  ├── NPC 事件链 (关联剧情)
+  ├── 主线任务 (前30天流程引导)
+  ├── 支线任务 (20+ NPC支线)
+  ├── 事件演出系统 (Camera + DialogBox + 动画)
+  └── 新闻系统 (股市点评/城市八卦)
 ```
 
-### Phase 3 — 打磨 + 发布（3周）
+### Phase 3 — 打磨 + 发布（6周）
 
 ```
-Week 12: 完善
-  ├── 新手引导 (第一天流程+提示)
-  ├── 设置/菜单/存档管理
-  ├── 数值平衡调试 (经济曲线)
-  ├── 美术风格统一 (像素艺术)
-  └── 音效/BGM 集成
+Week 17-18: 数值平衡 + 经济曲线
+  ├── 股市数值调优 (波动率/趋势/泡沫测试)
+  ├── 物价/工资/房租平衡
+  ├── 公司成长曲线调优
+  ├── NPC 日程合理性验证
+  ├── 钓鱼/烹饪收益平衡
+  └── 全流程测试 (从10万到1亿的路径)
 
-Week 13-14: 发布
-  ├── 画质打磨 + 性能优化
-  ├── 浏览器兼容性测试
-  ├── Electron 桌面打包
-  ├── itch.io 页面 + 截图/描述
+Week 19-20: 画质打磨 + 性能优化
+  ├── 素材代码生成参数调优 (视觉美观度)
+  ├── 光照/阴影/天气效果增强
+  ├── 粒子效果 (雨/雪/落叶/火花)
+  ├── TileSet 细节补充
+  ├── Web 导出优化 (wasm 体积/加载时间)
+  ├── 帧率优化 (绘制调用/batch/视口裁剪)
+  └── 内存管理 (场景资源释放/纹理缓存)
+
+Week 21-22: 发布准备
+  ├── 新手引导 (第一天流程+交互提示)
+  ├── 多端测试 (Web/Windows)
+  ├── itch.io 页面 + 截图/GIF/描述
+  ├── 游戏内 Credits/致谢
+  ├── 最终构建 + 导出
   └── 发布上线
 
 ---
 
-## 十九、原版可复用资源
+## 十九、原版可复用资源 (从 Phaser 版迁移)
 
-| 资源 | 复用方式 |
-|------|---------|
-| 世界观/城市设定 | 完全复用 (申海市背景和故事) |
-| NPC 人设 (王阿姨/阿强等) | 完全复用 (20+人设+对话风格) |
-| 股市经济模型 | 完全复用 (30股+政府+量化+散户+5因子定价) |
-| 公司系统设计 | 完全复用 (等级/行业/IPO/融资) |
-| 数值公式 | 完全复用 (管理属性/收入计算/手续费) |
-| 三账户体系 | 完全复用 (个人/证券/公司账户分离) |
-| 存档结构 | 改为地图坐标+室内外状态 (原版JSON结构可参考) |
-| 事件系统设计 | 完全复用 (周期事件/NPC事件链) |
+| 资源 | 复用方式 | 迁移工作 |
+|------|---------|---------|
+| 世界观/城市设定 | 完全复用 (申海市背景和故事) | 无需改动 |
+| NPC 人设 (王阿姨/阿强等) | 完全复用 (20+人设+对话风格) | 无需改动 |
+| 股市经济模型 | 完全复用 (30股+政府+量化+散户+5因子定价) | GDScript 语法翻译 |
+| 公司系统设计 | 完全复用 (等级/行业/IPO/融资/并购) | GDScript 语法翻译 |
+| 数值公式 | 完全复用 (管理属性/收入计算/手续费) | 直接平移 |
+| 三账户体系 | 完全复用 (个人/证券/公司账户分离) | GDScript 语法翻译 |
+| 存档结构 | 参考原有JSON结构 | 地图坐标+室内外状态适配 |
+| 事件系统设计 | 完全复用 (周期事件/NPC事件链) | 信号机制重构 |
+| BGM 音频 (9首MP3) | 完全复用 | 转为 .ogg 格式 + AudioStreamPlayer 适配 |
+| 对话数据 (300+条) | 完全复用 | JSON → Godot Resource 格式转换 |
+| **原 Phaser 代码** | **不复用** | 全部用 GDScript 重写 |
+| **原 HTML/CSS UI** | **不复用** | 全部用 Godot Control 节点重写 |
+| **原 Tiled 地图** | **参考布局** | 改为 Godot TileMap 绘制 |
+
+> **迁移原则**：所有设计文档和数值方案完全复用，所有代码和资源管线全部用 Godot 4 原生方案替代。
 
 ---
 

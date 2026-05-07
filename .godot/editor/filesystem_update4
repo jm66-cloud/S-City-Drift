@@ -1,0 +1,4 @@
+res://scenes/city/city.gd
+res://scenes/interior/exchange_interior.gd
+res://scenes/npc/npc.gd
+res://scripts/player/player.gd

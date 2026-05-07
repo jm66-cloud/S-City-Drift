@@ -9,19 +9,21 @@
 - **俯视角自由探索**：完整的城市地图，有海岸线、港口、灯塔、沙滩
 - **炒股致富**：证券交易所实时交易，K 线/分时走势，目标亿级财富自由
 - **生活模拟**：做饭、购物、装修自己的公寓、与 NPC 建立关系
-- **像素美术**：Modern Pixel Outlined 风格，DB32 调色板统一视觉
-- **跨平台**：itch.io Web 版 + Electron 桌面版（Windows / macOS / Linux）
+- **像素美术**：Modern Pixel Outlined 风格，DB32 调色板统一视觉，代码程序化生成
+- **跨平台**：itch.io Web 版 + Windows 桌面版
 
 ## 技术栈
 
 | 层 | 技术 |
 |----|------|
-| 游戏引擎 | Phaser 3 |
-| 桌面端 | Electron |
-| 语言 | TypeScript |
-| 构建工具 | Vite |
-| 地图编辑 | Tiled |
-| 数据存储 | localStorage (Web) / JSON 文件 (Electron) |
+| 游戏引擎 | Godot 4 (GDScript) |
+| 桌面端 | Godot 原生导出 (Windows) |
+| 语言 | GDScript |
+| 地图 | Godot TileMapLayer + TileSet |
+| 素材管线 | 代码程序化生成 (Image.set_pixel + DB32 调色板) |
+| UI | Godot Control 节点体系 (CanvasLayer) |
+| 数据存储 | JSON 文件 (FileAccess) |
+| 音效 | AudioStreamPlayer (Ogg 格式) |
 
 ## 项目状态
 
@@ -31,14 +33,17 @@
 - [x] 像素素材设计规格与调色板锁定
 - [x] AI 生成提示词库（地面、道路、建筑、家具、角色等 60+ 组）
 - [x] 9 首情绪分类 BGM（`sounds/`）
+- [x] 引擎切换决策: Phaser 3 → Godot 4
+- [x] 素材管线决策: 手绘/AI → 代码程序化生成
 
 待开始：
 
-- [ ] 项目脚手架（Vite + TypeScript + Phaser 3 + Electron）
-- [ ] 像素美术素材生成与处理
-- [ ] 瓦片地图绘制（Tiled）
-- [ ] Phaser 场景实现（21 个场景）
-- [ ] UI 覆盖层开发
+- [ ] Godot 4 项目脚手架
+- [ ] 素材代码生成管线开发 (palette/tile/building/character/furniture generators)
+- [ ] TileMap 城市地图绘制
+- [ ] 21 个 Godot 场景实现
+- [ ] UI Control 节点开发
+- [ ] 股市引擎移植 (GDScript)
 
 ## 快速开始
 
@@ -47,60 +52,43 @@
 git clone <repo-url>
 cd shen-hai-piao
 
-# 2. 安装依赖（脚手架搭建后）
-npm install
+# 2. 用 Godot 4 打开项目
+godot4 project.godot
 
-# 3. 开发模式
-npm run dev
-
-# 4. Electron 开发模式
-npm run electron:dev
-
-# 5. 生产构建
-npm run build
+# 3. 运行游戏
+# 在 Godot 编辑器中按 F5
 ```
 
-## 素材
+## 素材策略
 
-`assets/` 已整理好可直接使用的素材，来源与授权详见 `docs/ASSETS.md`。
+本项目采用**纯代码生成像素素材**策略，不依赖手绘或 AI 生成图片：
 
-| 分类 | 内容 | 授权 |
-|------|------|------|
-| 城市瓦片 | Roguelike City 16×16（草地/道路/建筑/树木/车辆） | CC0 |
-| 室内瓦片 | Modern Interiors 48×48（地板/墙壁/家具/装饰） | 非商业 |
-| 角色 | Adam/Alex/Amelia/Bob 动画 + TopDown 行走图 | 非商业 + CC-BY |
-| UI | Kenney UI Pack（按钮/图标/箭头/滑块/输入框/复选框） | CC0 |
-| 字体 | Kenney Future / Kenney Future Narrow | CC0 |
-| 音效 | Kenney UI 音效（click/switch/tap） | CC0 |
-| BGM | 项目自有 9 首情绪分类 MP3 | 自有 |
+| 分类 | 生成方式 |
+|------|---------|
+| 城市瓦片 | tile_generator.gd — 逐像素绘制草地/道路/水域/装饰 |
+| 建筑外观 | building_generator.gd — 随机纹理墙面+窗户布局 |
+| 角色/NPC | character_generator.gd — 分层合成 (身体+发型+服装) |
+| 室内家具 | furniture_generator.gd — 48×48 规格家具像素 |
+| UI 图标 | ui_icon_generator.gd — 按钮/面板/App 图标 |
+| 粒子特效 | effects.gd — 雨滴/火花/落叶纹理 |
 
-> **注意**：Modern Tiles Free（室内瓦片 + 角色）仅限非商业项目使用。如计划商业化发布，请替换为 CC0 素材或购买完整版授权（$1.20）。
+所有代码生成器共用 DawnBringer 32 (DB32) 调色板，保证视觉风格统一。
 
 ## 项目结构
 
 ```
 shen-hai-piao/
-├── assets/                 # 游戏素材（脚手架搭建后）
-│   ├── maps/               # Tiled 地图 (.tmj)
-│   ├── sprites/            # 精灵图（角色、NPC、物品）
-│   ├── tiles/              # 瓦片素材
-│   ├── ui/                 # UI 元素
-│   └── sounds/             # 音效与音乐
-├── src/                    # 源代码
-│   ├── scenes/             # Phaser 场景（21 个）
-│   ├── ui/                 # HTML/CSS UI 覆盖层
-│   ├── data/               # JSON 数据（NPC 日程、对话、股票配置）
-│   └── main.ts             # 入口
-├── docs/                   # 设计文档
-│   ├── itch-io策划案.md     # 完整游戏设计文档（GDD）
-│   ├── assets_design_spec.md
-│   ├── assets_spec_lock.md
-│   └── ai_prompts.md
-├── sounds/                 # 现有 BGM 素材（9 首 MP3）
-├── electron/               # Electron 主进程代码
-├── index.html
-├── vite.config.ts
-└── package.json
+├── project.godot               # Godot 项目配置
+├── assets/                     # 素材资源
+│   └── audio/                  # 音频文件 (BGM/SFX/Ambient)
+├── src/                        # 源代码
+│   ├── autoload/               # 全局单例 (Autoload)
+│   ├── systems/                # 核心玩法系统
+│   ├── procedural_assets/      # 素材代码生成系统
+│   └── data/                   # 静态数据
+├── scenes/                     # Godot 场景 (.tscn)
+├── scripts/                    # 节点挂载脚本
+└── docs/                       # 设计文档
 ```
 
 ## 文档索引
@@ -111,7 +99,7 @@ shen-hai-piao/
 | `docs/assets_design_spec.md` | 像素素材清单：角色、瓦片、物品、UI、特效规格 |
 | `docs/assets_spec_lock.md` | 技术锁定文件：调色板、画布尺寸、风格约束、禁止项 |
 | `docs/ai_prompts.md` | 60+ 组 AI 生成提示词，涵盖地面、建筑、家具、角色、UI |
-| `AGENTS.md` | 开发规范：TypeScript 规范、项目约定、代码风格 |
+| `AGENTS.md` | 开发规范：GDScript 规范、项目约定、代码风格 |
 
 ## 贡献
 
@@ -126,5 +114,4 @@ shen-hai-piao/
 ## 致谢
 
 - 调色板：[DawnBringer 32](https://lospec.com/palette-list/dawnbringer-32) by DawnBringer
-- 游戏引擎：[Phaser 3](https://phaser.io/)
-- 地图编辑：[Tiled](https://www.mapeditor.org/)
+- 游戏引擎：[Godot 4](https://godotengine.org/)

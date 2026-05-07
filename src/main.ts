@@ -1,6 +1,9 @@
 import * as Phaser from 'phaser';
 import BootScene from './scenes/BootScene';
-import CityScene from './scenes/CityScene';
+import SuburbScene from './scenes/SuburbScene';
+import DowntownScene from './scenes/DowntownScene';
+import BeachScene from './scenes/BeachScene';
+import CommercialScene from './scenes/CommercialScene';
 import ApartmentScene from './scenes/ApartmentScene';
 import ExchangeScene from './scenes/ExchangeScene';
 import StoreScene from './scenes/StoreScene';
@@ -22,7 +25,21 @@ const config: Phaser.Types.Core.GameConfig = {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
-  scene: [BootScene, CityScene, ApartmentScene, ExchangeScene, StoreScene, OfficeScene, CafeScene, BankScene, HospitalScene, PauseScene],
+  scene: [
+    BootScene,
+    SuburbScene,
+    DowntownScene,
+    BeachScene,
+    CommercialScene,
+    ApartmentScene,
+    ExchangeScene,
+    StoreScene,
+    OfficeScene,
+    CafeScene,
+    BankScene,
+    HospitalScene,
+    PauseScene,
+  ],
   physics: {
     default: 'arcade',
     arcade: {
@@ -36,4 +53,4 @@ const config: Phaser.Types.Core.GameConfig = {
 
 new Phaser.Game(config);
 
-console.log('[main] 申海漂 v0.0.3 已启动');
+console.log('[main] 申海漂 v0.1.0 已启动 — 多区域地图系统');

@@ -42,7 +42,7 @@ class BootScene extends Phaser.Scene {
       progressBox.destroy();
       loadingText.destroy();
       percentText.destroy();
-      this.scene.start('CityScene');
+      this.scene.start('SuburbScene');
     });
 
     this.loadAssets();

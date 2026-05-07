@@ -1,6 +1,5 @@
 # 「申海漂」— itch.io 完整策划案
 
-> 基于原 Godot 联机游戏《S市漂 (City Drift)》核心玩法重构
 > 目标平台：itch.io（Web 版 + Electron 桌面版）
 > 技术栈：Phaser 3 + Electron + TypeScript + Vite + Tiled
 > 玩法类型：**类星露谷物语**——俯视角2D城市生活模拟

@@ -1,5 +1,6 @@
 import * as Phaser from 'phaser';
 import BootScene from './scenes/BootScene';
+import TitleScene from './scenes/TitleScene';
 import SuburbScene from './scenes/SuburbScene';
 import DowntownScene from './scenes/DowntownScene';
 import BeachScene from './scenes/BeachScene';
@@ -27,6 +28,7 @@ const config: Phaser.Types.Core.GameConfig = {
   },
   scene: [
     BootScene,
+    TitleScene,
     SuburbScene,
     DowntownScene,
     BeachScene,
@@ -53,4 +55,4 @@ const config: Phaser.Types.Core.GameConfig = {
 
 new Phaser.Game(config);
 
-console.log('[main] 申海漂 v0.1.0 已启动 — 多区域地图系统');
+console.log('[main] 申海漂 v0.2.0 已启动');

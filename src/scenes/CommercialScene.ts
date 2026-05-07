@@ -1,9 +1,7 @@
 import { ZoneScene } from './ZoneScene';
 
 class CommercialScene extends ZoneScene {
-  constructor() {
-    super({ key: 'CommercialScene' });
-  }
+  constructor() { super({ key: 'CommercialScene' }); }
 
   init(data?: { startX?: number; startY?: number }): void {
     super.init();
@@ -11,6 +9,9 @@ class CommercialScene extends ZoneScene {
     this.worldHeight = 1600;
     this.zoneName = '🛍 申海商业街';
     this.zoneColor = 0x5a5a4a;
+    this.bgmKey = 'bgm-daily2';
+    this.roadColor = 0x6a6a7e;
+    this.sidewalkColor = 0x9a9a8e;
     this.playerStartX = data?.startX ?? 400;
     this.playerStartY = data?.startY ?? 800;
   }
@@ -22,74 +23,75 @@ class CommercialScene extends ZoneScene {
     ];
 
     this.buildings = [
-      { x: 300, y: 300, label: '🏪 便利店', color: 0x45283c, scene: 'StoreScene' },
-      { x: 700, y: 300, label: '☕ 咖啡馆', color: 0x8b6914, scene: 'CafeScene' },
-      { x: 1100, y: 300, label: '👔 服装店', color: 0x994488, scene: 'CommercialScene' },
+      { x: 250, y: 250, label: '🏪 便利店', color: 0x45283c, scene: 'StoreScene' },
+      { x: 600, y: 250, label: '☕ 咖啡馆', color: 0x8b6914, scene: 'CafeScene' },
+      { x: 950, y: 250, label: '👔 服装店', color: 0x994488, scene: 'CommercialScene' },
+      { x: 1300, y: 250, label: '📱 手机店', color: 0x888888, scene: 'CommercialScene' },
       { x: 400, y: 700, label: '🍜 餐厅', color: 0xcc6644, scene: 'CommercialScene' },
       { x: 800, y: 700, label: '💇 理发店', color: 0x4488cc, scene: 'CommercialScene' },
-      { x: 1200, y: 700, label: '📱 手机店', color: 0x888888, scene: 'CommercialScene' },
-      { x: 600, y: 1100, label: '🍺 酒吧', color: 0x664433, scene: 'CommercialScene' },
-      { x: 1100, y: 1100, label: '🎬 电影院', color: 0x334466, scene: 'CommercialScene' },
+      { x: 1200, y: 700, label: '🍺 酒吧', color: 0x664433, scene: 'CommercialScene' },
+      { x: 600, y: 1150, label: '🎬 电影院', color: 0x334466, scene: 'CommercialScene' },
+      { x: 1100, y: 1150, label: '🎮 游戏厅', color: 0x663366, scene: 'CommercialScene' },
     ];
 
     this.npcData = [
-      { x: 750, y: 370, color: 0xffccaa, name: '小琳', role: '咖啡馆老板娘', greetings: ['欢迎光临～今天的新豆子刚到。', '最近研究了一个新的拉花图案！', '你的品味一直很好呢...'] },
-      { x: 380, y: 370, color: 0x88cc88, name: '小美', role: '便利店店员', greetings: ['欢迎光临～', '今天的特价商品看过了吗？', '需要帮忙找什么吗？'] },
+      { x: 650, y: 320, color: 0xffccaa, name: '小琳', role: '咖啡师', greetings: ['欢迎光临～新豆子刚到。', '最近研究了新拉花！', '你的品味一直很好呢...'] },
+      { x: 320, y: 320, color: 0x88cc88, name: '周老板', role: '店主', greetings: ['欢迎光临～', '今天的特价商品看了吗？', '需要帮忙找什么吗？'] },
+      { x: 850, y: 770, color: 0xcc88ff, name: '美玲', role: '护士', greetings: ['工作太累了，来放松一下。', '健康很重要哦。', '你看起来气色不错！'] },
     ];
 
     super.create();
   }
 
   protected drawRoads(): void {
-    const gfx = this.add.graphics().setDepth(1);
-    const road = 0x6a6a7e;
-
     // 步行街主路
-    gfx.fillStyle(0x9a9a8e, 1);
-    gfx.fillRect(0, 550, this.worldWidth, 100);
-
-    // 侧路
-    gfx.fillStyle(road, 1);
-    gfx.fillRect(200, 0, 50, this.worldHeight);
-    gfx.fillRect(650, 0, 50, 550);
-    gfx.fillRect(1050, 650, 50, 550);
-    gfx.fillRect(650, 950, 50, this.worldHeight - 950);
-    gfx.fillRect(1500, 0, 50, this.worldHeight);
+    this.drawIrregularRoad([
+      { x: 0, y: 520 }, { x: 100, y: 510 }, { x: 300, y: 540 }, { x: 600, y: 520 },
+      { x: 1000, y: 540 }, { x: 1400, y: 520 }, { x: 1700, y: 530 }, { x: 1800, y: 520 },
+      { x: 1800, y: 620 }, { x: 1700, y: 610 }, { x: 1400, y: 620 },
+      { x: 1000, y: 600 }, { x: 600, y: 620 }, { x: 300, y: 610 }, { x: 100, y: 620 }, { x: 0, y: 610 },
+    ]);
+    // 纵向路
+    this.drawIrregularRoad([
+      { x: 200, y: 0 }, { x: 260, y: 0 }, { x: 270, y: 510 }, { x: 210, y: 510 },
+    ]);
+    this.drawIrregularRoad([
+      { x: 700, y: 620 }, { x: 760, y: 620 }, { x: 770, y: this.worldHeight }, { x: 710, y: this.worldHeight },
+    ]);
+    this.drawIrregularRoad([
+      { x: 1100, y: 620 }, { x: 1160, y: 620 }, { x: 1170, y: this.worldHeight }, { x: 1110, y: this.worldHeight },
+    ]);
   }
 
   protected drawTerrain(): void {
-    const gfx = this.add.graphics().setDepth(2);
-
-    // 路灯
-    const lamps = [200, 500, 800, 1100, 1500];
-    gfx.fillStyle(0xccccaa, 1);
-    lamps.forEach(x => {
-      gfx.fillRect(x - 2, 540, 4, 20);
-      gfx.fillStyle(0xffffaa, 1);
-      gfx.fillCircle(x, 535, 6);
-      gfx.fillStyle(0xccccaa, 1);
-    });
+    // 步行街路灯
+    [200, 450, 700, 950, 1200, 1450].forEach(x => this.drawLamp(x, 510));
 
     // 花坛
-    gfx.fillStyle(0x3a6e3a, 1);
-    gfx.fillRect(50, 600, 100, 40);
-    gfx.fillRect(400, 600, 100, 40);
-    gfx.fillRect(750, 600, 100, 40);
-    gfx.fillRect(1100, 600, 100, 40);
-    gfx.fillRect(1450, 600, 100, 40);
+    this.drawFlowerBed(50, 560, 100, 40);
+    this.drawFlowerBed(350, 560, 100, 40);
+    this.drawFlowerBed(600, 560, 100, 40);
+    this.drawFlowerBed(850, 560, 100, 40);
+    this.drawFlowerBed(1100, 560, 100, 40);
+    this.drawFlowerBed(1350, 560, 100, 40);
+    this.drawFlowerBed(1550, 560, 100, 40);
 
     // 喷泉广场
-    gfx.fillStyle(0x4488cc, 1);
-    gfx.fillCircle(900, 1250, 60);
-    gfx.lineStyle(3, 0x66aacc);
-    gfx.strokeCircle(900, 1250, 60);
+    const gfx = this.add.graphics().setDepth(2);
+    gfx.fillStyle(0x5599cc, 1);
+    gfx.fillCircle(900, 1250, 55);
+    gfx.lineStyle(3, 0x77bbdd);
+    gfx.strokeCircle(900, 1250, 55);
+    gfx.fillStyle(0x66aadd, 0.5);
+    gfx.fillCircle(900, 1250, 30);
 
     // 树
-    gfx.fillStyle(0x2a5e2a, 1);
-    [100, 350, 600, 850, 1350, 1650].forEach(x => {
-      gfx.fillCircle(x, 500, 14);
-      gfx.fillRect(x - 2, 510, 4, 15);
-    });
+    this.drawTreeCluster(80, 150, 3);
+    this.drawTreeCluster(450, 120, 4);
+    this.drawTreeCluster(1400, 120, 3);
+    this.drawTreeCluster(1600, 400, 3);
+    this.drawTreeCluster(160, 950, 4);
+    this.drawTreeCluster(1550, 950, 3);
   }
 }
 

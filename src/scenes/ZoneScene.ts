@@ -70,9 +70,11 @@ export class ZoneScene extends Phaser.Scene {
     // 主色调背景
     this.add.rectangle(this.worldWidth / 2, this.worldHeight / 2, this.worldWidth, this.worldHeight, this.zoneColor).setDepth(0);
 
-    // 尝试用 tileset 平铺地面
-    if (this.textures.exists('ground-tile')) {
-      this.add.tileSprite(this.worldWidth / 2, this.worldHeight / 2, this.worldWidth, this.worldHeight, 'ground-tile').setDepth(0).setAlpha(0.15);
+    // 用 tileset 平铺地面纹理
+    const tileKey = this.textures.exists('ground-tile-clean') ? 'ground-tile-clean'
+      : this.textures.exists('ground-tile-roam') ? 'ground-tile-roam' : null;
+    if (tileKey) {
+      this.add.tileSprite(this.worldWidth / 2, this.worldHeight / 2, this.worldWidth, this.worldHeight, tileKey).setDepth(0).setAlpha(0.2);
     }
 
     // 添加地面噪声纹理

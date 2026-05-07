@@ -51,6 +51,8 @@ class BootScene extends Phaser.Scene {
   private loadAssets(): void {
     // 城市瓦片
     this.load.image('roguelikeCity', 'assets/tiles/city/roguelikeCity.png');
+    this.load.image('cleanCity', 'assets/tiles/city/cleanCity.png');
+    this.load.image('cleanCityPadded', 'assets/tiles/city/cleanCity_padded.png');
     // 室内瓦片
     this.load.image('interiors', 'assets/tiles/indoor/interiors.png');
     this.load.image('roomBuilder', 'assets/tiles/indoor/roomBuilder.png');
@@ -82,16 +84,19 @@ class BootScene extends Phaser.Scene {
   }
 
   create(): void {
-    // 从 tileset 生成地面平铺纹理 (16x16 → 64x64)
-    if (this.textures.exists('roguelikeCity')) {
-      const src = this.textures.get('roguelikeCity');
-      const canvas = this.textures.createCanvas('ground-tile', 64, 64);
-      if (canvas) {
-        const ctx = canvas.context;
-        // 从 tileset 左上角截取第一个 tile（通常是草地）
-        ctx.drawImage(src.getSourceImage() as HTMLImageElement, 1, 1, 15, 15, 0, 0, 64, 64);
-        canvas.refresh();
-      }
+    // 从 citieset 生成地面平铺纹理
+    this.generateGroundTexture('roguelikeCity', 'ground-tile-roam', 64);
+    this.generateGroundTexture('cleanCity', 'ground-tile-clean', 64);
+  }
+
+  private generateGroundTexture(tilesetKey: string, outKey: string, size: number): void {
+    if (!this.textures.exists(tilesetKey)) return;
+    const src = this.textures.get(tilesetKey);
+    const canvas = this.textures.createCanvas(outKey, size, size);
+    if (canvas) {
+      const ctx = canvas.context;
+      ctx.drawImage(src.getSourceImage() as HTMLImageElement, 1, 1, 15, 15, 0, 0, size, size);
+      canvas.refresh();
     }
   }
 }

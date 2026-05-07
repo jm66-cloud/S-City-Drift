@@ -81,7 +81,19 @@ class BootScene extends Phaser.Scene {
     this.load.audio('sfx-switch', 'assets/sounds/switch-a.ogg');
   }
 
-  create(): void {}
+  create(): void {
+    // 从 tileset 生成地面平铺纹理 (16x16 → 64x64)
+    if (this.textures.exists('roguelikeCity')) {
+      const src = this.textures.get('roguelikeCity');
+      const canvas = this.textures.createCanvas('ground-tile', 64, 64);
+      if (canvas) {
+        const ctx = canvas.context;
+        // 从 tileset 左上角截取第一个 tile（通常是草地）
+        ctx.drawImage(src.getSourceImage() as HTMLImageElement, 1, 1, 15, 15, 0, 0, 64, 64);
+        canvas.refresh();
+      }
+    }
+  }
 }
 
 export default BootScene;

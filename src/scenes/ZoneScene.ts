@@ -67,7 +67,30 @@ export class ZoneScene extends Phaser.Scene {
   }
 
   protected drawGround(): void {
+    // 主色调背景
     this.add.rectangle(this.worldWidth / 2, this.worldHeight / 2, this.worldWidth, this.worldHeight, this.zoneColor).setDepth(0);
+
+    // 尝试用 tileset 平铺地面
+    if (this.textures.exists('ground-tile')) {
+      this.add.tileSprite(this.worldWidth / 2, this.worldHeight / 2, this.worldWidth, this.worldHeight, 'ground-tile').setDepth(0).setAlpha(0.15);
+    }
+
+    // 添加地面噪声纹理
+    const gfx = this.add.graphics().setDepth(0);
+    const noiseCount = Math.floor(this.worldWidth * this.worldHeight / 1200);
+    for (let i = 0; i < noiseCount; i++) {
+      const x = Math.random() * this.worldWidth;
+      const y = Math.random() * this.worldHeight;
+      const shade = (Math.random() - 0.5) * 0.2;
+      const r = ((this.zoneColor >> 16) & 0xff) + shade * 255;
+      const g = ((this.zoneColor >> 8) & 0xff) + shade * 255;
+      const b = (this.zoneColor & 0xff) + shade * 255;
+      const color = (Math.max(0, Math.min(255, Math.floor(r))) << 16)
+        | (Math.max(0, Math.min(255, Math.floor(g))) << 8)
+        | Math.max(0, Math.min(255, Math.floor(b)));
+      gfx.fillStyle(color, 0.4);
+      gfx.fillCircle(x, y, 1 + Math.random() * 3);
+    }
   }
 
   protected drawRoads(): void {}
